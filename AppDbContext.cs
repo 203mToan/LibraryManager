@@ -11,6 +11,8 @@ namespace MyApi
         public DbSet<User> Users => Set<User>();
         public DbSet<Role> Roles => Set<Role>();
         public DbSet<RefreshTokens> RefreshTokens => Set<RefreshTokens>();
+        public DbSet<Book> Books { get; set; }
+        public DbSet<Category> Categories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -20,6 +22,10 @@ namespace MyApi
                 .HasForeignKey(u => u.RoleId)
                 .OnDelete(DeleteBehavior.Restrict);
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Book>()
+                .Property(x => x.Id)
+                .ValueGeneratedOnAdd();
         }
     }
 }
