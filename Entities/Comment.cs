@@ -3,7 +3,7 @@
     public class Comment : BaseEntity<Guid>
     {
         public Guid UserId { get; set; }
-        public Guid BookId { get; set; }
+        public int? BookId { get; set; }
 
         public int Rating { get; set; } // 1-5
         public string? Content { get; set; }

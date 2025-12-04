@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MyApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251204065206_Init")]
-    partial class Init
+    [Migration("20251204091708_changeName")]
+    partial class changeName
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -45,7 +45,7 @@ namespace MyApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Author");
+                    b.ToTable("Authors");
                 });
 
             modelBuilder.Entity("MyApi.Entities.Book", b =>
@@ -126,10 +126,7 @@ namespace MyApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("BookId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("BookId1")
+                    b.Property<int?>("BookId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Content")
@@ -152,11 +149,11 @@ namespace MyApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BookId1");
+                    b.HasIndex("BookId");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Comment");
+                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("MyApi.Entities.FavoriteBook", b =>
@@ -165,10 +162,7 @@ namespace MyApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("BookId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("BookId1")
+                    b.Property<int?>("BookId")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
@@ -182,23 +176,22 @@ namespace MyApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BookId1");
+                    b.HasIndex("BookId");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("FavoriteBook");
+                    b.ToTable("FavoriteBooks");
                 });
 
             modelBuilder.Entity("MyApi.Entities.Loan", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
 
-                    b.Property<Guid>("BookId")
-                        .HasColumnType("uuid");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BookId1")
+                    b.Property<int>("BookId")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
@@ -224,11 +217,11 @@ namespace MyApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BookId1");
+                    b.HasIndex("BookId");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Loan");
+                    b.ToTable("Loans");
                 });
 
             modelBuilder.Entity("MyApi.Entities.RefreshTokens", b =>
@@ -362,9 +355,7 @@ namespace MyApi.Migrations
                 {
                     b.HasOne("MyApi.Entities.Book", "Book")
                         .WithMany("Comments")
-                        .HasForeignKey("BookId1")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("BookId");
 
                     b.HasOne("MyApi.Entities.User", "User")
                         .WithMany()
@@ -381,9 +372,7 @@ namespace MyApi.Migrations
                 {
                     b.HasOne("MyApi.Entities.Book", "Book")
                         .WithMany("FavoriteBooks")
-                        .HasForeignKey("BookId1")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("BookId");
 
                     b.HasOne("MyApi.Entities.User", "User")
                         .WithMany()
@@ -400,12 +389,12 @@ namespace MyApi.Migrations
                 {
                     b.HasOne("MyApi.Entities.Book", "Book")
                         .WithMany("Loans")
-                        .HasForeignKey("BookId1")
+                        .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("MyApi.Entities.User", "User")
-                        .WithMany()
+                        .WithMany("Loans")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -458,6 +447,11 @@ namespace MyApi.Migrations
             modelBuilder.Entity("MyApi.Entities.Role", b =>
                 {
                     b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("MyApi.Entities.User", b =>
+                {
+                    b.Navigation("Loans");
                 });
 #pragma warning restore 612, 618
         }

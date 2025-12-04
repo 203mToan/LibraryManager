@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MyApi.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -127,11 +127,10 @@ namespace MyApi.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    BookId = table.Column<Guid>(type: "uuid", nullable: false),
+                    BookId = table.Column<int>(type: "integer", nullable: true),
                     Rating = table.Column<int>(type: "integer", nullable: false),
                     Content = table.Column<string>(type: "text", nullable: true),
                     Status = table.Column<string>(type: "text", nullable: true),
-                    BookId1 = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
@@ -139,11 +138,10 @@ namespace MyApi.Migrations
                 {
                     table.PrimaryKey("PK_Comment", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Comment_Books_BookId1",
-                        column: x => x.BookId1,
+                        name: "FK_Comment_Books_BookId",
+                        column: x => x.BookId,
                         principalTable: "Books",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Comment_Users_UserId",
                         column: x => x.UserId,
@@ -158,8 +156,7 @@ namespace MyApi.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    BookId = table.Column<Guid>(type: "uuid", nullable: false),
-                    BookId1 = table.Column<int>(type: "integer", nullable: false),
+                    BookId = table.Column<int>(type: "integer", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
@@ -167,11 +164,10 @@ namespace MyApi.Migrations
                 {
                     table.PrimaryKey("PK_FavoriteBook", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_FavoriteBook_Books_BookId1",
-                        column: x => x.BookId1,
+                        name: "FK_FavoriteBook_Books_BookId",
+                        column: x => x.BookId,
                         principalTable: "Books",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_FavoriteBook_Users_UserId",
                         column: x => x.UserId,
@@ -184,14 +180,14 @@ namespace MyApi.Migrations
                 name: "Loan",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    BookId = table.Column<Guid>(type: "uuid", nullable: false),
+                    BookId = table.Column<int>(type: "integer", nullable: false),
                     LoanDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     DueDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     ReturnDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     Status = table.Column<string>(type: "text", nullable: true),
-                    BookId1 = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
@@ -199,8 +195,8 @@ namespace MyApi.Migrations
                 {
                     table.PrimaryKey("PK_Loan", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Loan_Books_BookId1",
-                        column: x => x.BookId1,
+                        name: "FK_Loan_Books_BookId",
+                        column: x => x.BookId,
                         principalTable: "Books",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -247,9 +243,9 @@ namespace MyApi.Migrations
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Comment_BookId1",
+                name: "IX_Comment_BookId",
                 table: "Comment",
-                column: "BookId1");
+                column: "BookId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Comment_UserId",
@@ -257,9 +253,9 @@ namespace MyApi.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_FavoriteBook_BookId1",
+                name: "IX_FavoriteBook_BookId",
                 table: "FavoriteBook",
-                column: "BookId1");
+                column: "BookId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_FavoriteBook_UserId",
@@ -267,9 +263,9 @@ namespace MyApi.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Loan_BookId1",
+                name: "IX_Loan_BookId",
                 table: "Loan",
-                column: "BookId1");
+                column: "BookId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Loan_UserId",

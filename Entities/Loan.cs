@@ -1,9 +1,9 @@
 ﻿namespace MyApi.Entities
 {
-    public class Loan : BaseEntity<Guid>
+    public class Loan : BaseEntity<int>
     {
         public Guid UserId { get; set; }
-        public Guid BookId { get; set; }
+        public int BookId { get; set; }
 
         public DateTime? LoanDate { get; set; }
         public DateTime? DueDate { get; set; }

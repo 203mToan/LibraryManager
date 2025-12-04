@@ -3,7 +3,7 @@
     public class FavoriteBook : BaseEntity<Guid>
     {
         public Guid UserId { get; set; }
-        public Guid BookId { get; set; }
+        public int? BookId { get; set; }
 
         // Navigation
         public User User { get; set; } = null!;
