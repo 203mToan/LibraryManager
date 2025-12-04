@@ -85,5 +85,28 @@ namespace MyApi.Services.Books
 
             return true;
         }
+
+        public async Task<PagedBookResponse> GetAllBooksAsync(int? pageIndex, int? pageSize)
+        {
+            var books = await _db.Books
+                .Include(x => x.Author)
+                .Include(x => x.Category)
+                .ToListAsync();
+           var bookResponse = books.Select(book => new BookResponse
+            {
+                Id = book.Id,
+                Title = book.Title,
+                Description = book.Description,
+                ThumbnailUrl = book.ThumbnailUrl,
+                AuthorId = book.AuthorId,
+                CategoryId = (int)book.CategoryId,
+                Publisher = book.Publisher,
+                YearPublished = book.YearPublished,
+                StockQuantity = book.StockQuantity
+            }).ToList();
+            var totalItems = books.Count();
+            return new PagedBookResponse(bookResponse, totalItems, pageSize);
+
+        }
     }
 }

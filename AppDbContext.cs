@@ -23,6 +23,11 @@ namespace MyApi
                 .OnDelete(DeleteBehavior.Restrict);
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Category>();
+            modelBuilder.Entity<Comment>();
+            modelBuilder.Entity<FavoriteBook>();
+            modelBuilder.Entity<Loan>();
+            modelBuilder.Entity<Author>();
             modelBuilder.Entity<Book>()
                 .Property(x => x.Id)
                 .ValueGeneratedOnAdd();

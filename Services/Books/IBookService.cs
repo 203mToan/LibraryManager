@@ -10,5 +10,6 @@ namespace MyApi.Services.Books
         Task<BookCreateResponse?> CreateBookAsync(BookCreateRequest request);
         Task<BookUpdateResponse?> UpdateBookAsync(BookUpdateRequest request);
         Task<bool> DeleteBookAsync(int id);
+        Task<PagedBookResponse> GetAllBooksAsync(int? pageIndex, int? pageSize);
     }
 }

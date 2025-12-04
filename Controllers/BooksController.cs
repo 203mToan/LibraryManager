@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MyApi.Model.Request;
 using MyApi.Services;
 
 namespace MyApi.Services.Books
 {
+    [Route("api/book")]
     public class BooksController : ControllerBase
     {
         private readonly IBookService _bookService;
@@ -12,8 +14,15 @@ namespace MyApi.Services.Books
         {
             _bookService = bookService;
         }
-
-        [HttpPost("create")]
+        [Authorize("AdminOrUser")]
+        [HttpGet]
+        public async Task<IActionResult> GetAllBooks(int? pageIndex, int? pageSize)
+        {
+            var books = await _bookService.GetAllBooksAsync(pageIndex, pageSize);
+            return Ok(books);
+        }
+        [Authorize("AdminOnly")]
+        [HttpPost]
         public async Task<IActionResult> CreateBook(BookCreateRequest model)
         {
             var result = await _bookService.CreateBookAsync(model);
@@ -29,7 +38,9 @@ namespace MyApi.Services.Books
 
             return Ok(response);
         }
-        [HttpPut("update")]
+
+        [Authorize("AdminOnly")]
+        [HttpPut]
         public async Task<IActionResult> UpdateBook(BookUpdateRequest model)
         {
             var result = await _bookService.UpdateBookAsync(model);
@@ -45,7 +56,9 @@ namespace MyApi.Services.Books
 
             return Ok(response);
         }
-        [HttpDelete("delete")]
+
+        [Authorize("AdminOnly")]
+        [HttpDelete]
         public async Task<IActionResult> DeleteBook(int id)
         {
             var result = await _bookService.DeleteBookAsync(id);

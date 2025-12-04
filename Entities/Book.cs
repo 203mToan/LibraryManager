@@ -7,7 +7,7 @@
         public string? Description { get; set; }
 
         public Guid AuthorId { get; set; } 
-        public Guid CategoryId { get; set; }
+        public int? CategoryId { get; set; }
 
         public string? Publisher { get; set; }
         public int? YearPublished { get; set; }
@@ -20,5 +20,6 @@
         public ICollection<Loan>? Loans { get; set; }
         public ICollection<Comment>? Comments { get; set; }
         public ICollection<FavoriteBook>? FavoriteBooks { get; set; }
+
     }
 }
