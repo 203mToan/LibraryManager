@@ -9,7 +9,11 @@ using MyApi.Services.Books;
 using MyApi.Services.Identity;
 using MyApi.Services.Loans;
 using MyApi.Services.Users;
+using MyApi.Services.Categories;
+using MyApi.Services.Authors;
+
 using System.Text;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,6 +53,10 @@ builder.Services.AddScoped<IIdentityService, IdentityService>();
 builder.Services.AddScoped<ILoanService, LoanService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IBookService, BookService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IAuthorService, AuthorService>();
+
+
 
 builder.Services.AddSingleton<TokenService>();
 // Add services to the container.

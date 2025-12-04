@@ -1,4 +1,4 @@
-﻿namespace MyApi.Model.Response.Category
+﻿namespace MyApi.Model.Response
 {
     public class CategoryCreateResponse
     {
