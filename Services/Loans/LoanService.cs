@@ -158,39 +158,12 @@ namespace MyApi.Services.Loans
                 return null;
 
             if (!loan.DueDate.HasValue)
-                throw new Exception("Loan does not have due date.");
-
-            int fine = 0;
-
-            // Nếu chưa trả → tính đến hôm nay
-            if (loan.ReturnDate == null && DateTime.Now > loan.DueDate.Value)
-            {
-                fine = CaculationFineAmount.CalculateFineAmount(loan.DueDate.Value, DateTime.Now);
-            }
-
-            // Nếu đã trả sách nhưng trả muộn
-            if (loan.ReturnDate != null && loan.ReturnDate.Value > loan.DueDate.Value)
-            {
-                fine = CaculationFineAmount.CalculateFineAmount(loan.DueDate.Value, loan.ReturnDate.Value);
-            }
-
-            if (fine <= 0)
-                throw new Exception("No fine to pay.");
-
-            // Sau khi thanh toán → xóa tiền phạt
-            loan. = 0;
-
-            // Cập nhật trạng thái
-            if (loan.ReturnDate != null)
-                loan.Status = LoanStatus.Returned.ToString();
-            else
-                loan.Status = LoanStatus.Approved.ToString(); // hoặc "PaidFine" nếu muốn tách trạng thái
-
+                throw new Exception("Loan does not have a due date.");
+            loan.Status = LoanStatus.Returned.ToString();
             loan.UpdatedAt = DateTime.UtcNow;
-
             await _db.SaveChangesAsync();
-
             return new LoanResponse().ToResponse(loan);
         }
+
     }
 }
