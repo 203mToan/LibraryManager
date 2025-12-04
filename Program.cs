@@ -1,12 +1,13 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using MyApi;
-using MyApi.Services;
-using MyApi.Services.Users;
-using System.Text;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
+using MyApi;
+using MyApi.Services;
+using MyApi.Services.Books;
+using MyApi.Services.Users;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,6 +43,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IBookService, BookService>();
+
 builder.Services.AddSingleton<TokenService>();
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
