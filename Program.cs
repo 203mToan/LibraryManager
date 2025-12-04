@@ -6,6 +6,8 @@ using Microsoft.OpenApi.Models;
 using MyApi;
 using MyApi.Services;
 using MyApi.Services.Books;
+using MyApi.Services.Identity;
+using MyApi.Services.Loans;
 using MyApi.Services.Users;
 using System.Text;
 
@@ -42,6 +44,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IIdentityService, IdentityService>();
+builder.Services.AddScoped<ILoanService, LoanService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IBookService, BookService>();
 

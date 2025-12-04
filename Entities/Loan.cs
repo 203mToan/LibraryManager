@@ -15,4 +15,12 @@
         public User User { get; set; } = null!;
         public Book Book { get; set; } = null!;
     }
+
+    public enum LoanStatus
+    {
+        Pending,
+        Approved,
+        Returned,
+        Overdue
+    }
 }
