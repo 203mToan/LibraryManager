@@ -1,9 +1,11 @@
-﻿namespace MyApi.Model.Request
+﻿namespace MyApi.Model.Response
 {
-    public class CategoryUpdateRequest
+    public class CategoryResponse
     {
         public int Id { get; set; }
         public string? Name { get; set; }
         public string? Description { get; set; }
+        public int? BookCount { get; set; }
     }
 }
+
