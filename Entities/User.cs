@@ -22,6 +22,7 @@
 
         public int? RoleId { get; set; }
         public Role Role { get; set; }
+        public ICollection<Loan> Loans { get; set; }
 
 
     }
