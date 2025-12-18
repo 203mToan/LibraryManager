@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "8bXfeJ7py9s=",
+  "dgSpecHash": "o/rB6BQVoV8=",
   "success": true,
-  "projectFilePath": "D:\\DoanTN\\MyApi.csproj",
+  "projectFilePath": "D:\\tv\\DoanTN\\MyApi.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Toan LK\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
     "C:\\Users\\Toan LK\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",

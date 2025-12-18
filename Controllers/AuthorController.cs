@@ -2,10 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using MyApi.Model.Request;
 using MyApi.Model.Response;
+using MyApi.Services.Authors;
 using System;
 using System.Threading.Tasks;
 
-namespace MyApi.Services.Authors
+namespace MyApi.Controllers
 {
     [Route("api/author")]
     [ApiController]
@@ -18,13 +19,16 @@ namespace MyApi.Services.Authors
             _authorService = authorService;
         }
 
-        // GET: api/author?pageIndex=1&pageSize=10
+        // GET: api/author?page=1&pageSize=10
         [Authorize("AdminOrUser")]
         [HttpGet]
-        public async Task<IActionResult> GetAllAuthors(int? pageIndex, int? pageSize)
+        public async Task<IActionResult> GetAllAuthors(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10
+        )
         {
-            var authors = await _authorService.GetAllAuthorsAsync(pageIndex, pageSize);
-            return Ok(authors);
+            var result = await _authorService.GetAllAuthorsAsync(page, pageSize);
+            return Ok(result);
         }
 
         // GET: api/author/{id}
@@ -33,17 +37,18 @@ namespace MyApi.Services.Authors
         public async Task<IActionResult> GetById(Guid id)
         {
             var author = await _authorService.GetByIdAsync(id);
-            if (author == null) return NotFound(new { message = "Author not found" });
+            if (author == null)
+                return NotFound(new { message = "Author not found" });
 
-            var response = new AuthorResponse
+            return Ok(new AuthorResponse
             {
                 Id = author.Id,
                 FullName = author.FullName,
                 Bio = author.Bio,
-                BookCount = author.Books?.Count
-            };
-
-            return Ok(response);
+                Nationality = author.Nationality,
+                BirthYear = author.BirthYear,
+                BookCount = author.Books?.Count ?? 0
+            });
         }
 
         // POST: api/author
@@ -52,9 +57,10 @@ namespace MyApi.Services.Authors
         public async Task<IActionResult> CreateAuthor([FromBody] AuthorCreateRequest model)
         {
             var result = await _authorService.CreateAuthorAsync(model);
-            if (result == null) return BadRequest(new { message = "Failed to create author" });
+            if (result == null)
+                return BadRequest(new { message = "Failed to create author" });
 
-            return Ok(new { Id = result.Id, Message = result.Message });
+            return Ok(result);
         }
 
         // PUT: api/author
@@ -63,9 +69,10 @@ namespace MyApi.Services.Authors
         public async Task<IActionResult> UpdateAuthor([FromBody] AuthorUpdateRequest model)
         {
             var result = await _authorService.UpdateAuthorAsync(model);
-            if (result == null) return NotFound(new { message = "Author not found" });
+            if (result == null)
+                return NotFound(new { message = "Author not found" });
 
-            return Ok(new { Id = result.Id, Message = result.Message });
+            return Ok(result);
         }
 
         // DELETE: api/author/{id}
@@ -74,7 +81,8 @@ namespace MyApi.Services.Authors
         public async Task<IActionResult> DeleteAuthor(Guid id)
         {
             var deleted = await _authorService.DeleteAuthorAsync(id);
-            if (!deleted) return NotFound(new { message = "Author not found or cannot be deleted" });
+            if (!deleted)
+                return NotFound(new { message = "Author not found or cannot be deleted" });
 
             return Ok(new { message = "Author deleted successfully" });
         }

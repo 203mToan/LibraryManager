@@ -30,9 +30,11 @@ namespace MyApi.Services.Authors
 
             var author = new Author
             {
-                Id = Guid.NewGuid(), // safe for Guid PKs; remove if DB generates GUID
+                Id = Guid.NewGuid(),
                 FullName = request.FullName,
                 Bio = request.Bio,
+                Nationality = request.Nationality,
+                BirthYear = request.BirthYear,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -53,8 +55,17 @@ namespace MyApi.Services.Authors
             var author = await _db.Authors.FirstOrDefaultAsync(a => a.Id == request.Id);
             if (author == null) return null;
 
-            if (request.FullName != null) author.FullName = request.FullName;
-            if (request.Bio != null) author.Bio = request.Bio;
+            if (!string.IsNullOrWhiteSpace(request.FullName))
+                author.FullName = request.FullName;
+
+            if (request.Bio != null)
+                author.Bio = request.Bio;
+
+            if (request.National != null)
+                author.Nationality = request.National;
+
+            if (request.BirthYear.HasValue)
+                author.BirthYear = request.BirthYear;
 
             author.UpdatedAt = DateTime.UtcNow;
 
@@ -75,50 +86,43 @@ namespace MyApi.Services.Authors
 
             if (author == null) return false;
 
-            // Optional business rule: prevent delete if has books
-            // if (author.Books != null && author.Books.Any()) return false;
-
             _db.Authors.Remove(author);
             await _db.SaveChangesAsync();
             return true;
         }
 
-        public async Task<PagedAuthorResponse> GetAllAuthorsAsync(int? pageIndex, int? pageSize)
+        // ⭐ PAGINATION CHUẨN – KHÔNG TRẢ ALL DATA
+        public async Task<PagedAuthorResponse> GetAllAuthorsAsync(int page, int pageSize)
         {
-            var query = _db.Authors.AsQueryable();
+            if (page <= 0) page = 1;
+            if (pageSize <= 0) pageSize = 10;
+
+            var query = _db.Authors
+                .Include(a => a.Books)
+                .AsQueryable();
 
             var totalItems = await query.CountAsync();
 
-            if (!pageIndex.HasValue || !pageSize.HasValue || pageSize.Value <= 0)
-            {
-                var all = await query.Include(a => a.Books).ToListAsync();
-                var itemsAll = all.Select(a => new AuthorResponse
+            var items = await query
+                .OrderBy(a => a.FullName)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(a => new AuthorResponse
                 {
                     Id = a.Id,
                     FullName = a.FullName,
                     Bio = a.Bio,
-                    BookCount = a.Books?.Count
-                }).ToList();
-
-                return new PagedAuthorResponse(itemsAll, totalItems, pageSize);
-            }
-
-            var skip = (pageIndex.Value - 1) * pageSize.Value;
-            var paged = await query
-                .Include(a => a.Books)
-                .Skip(skip)
-                .Take(pageSize.Value)
+                    Nationality = a.Nationality,
+                    BirthYear = a.BirthYear,
+                    BookCount = a.Books.Count
+                })
                 .ToListAsync();
 
-            var items = paged.Select(a => new AuthorResponse
-            {
-                Id = a.Id,
-                FullName = a.FullName,
-                Bio = a.Bio,
-                BookCount = a.Books?.Count
-            }).ToList();
-
-            return new PagedAuthorResponse(items, totalItems, pageSize);
+            return new PagedAuthorResponse(
+                items,
+                totalItems,
+                pageSize
+            );
         }
     }
 }

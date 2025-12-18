@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\DoanTN\\MyApi.csproj": {}
+    "D:\\tv\\DoanTN\\MyApi.csproj": {}
   },
   "projects": {
-    "D:\\DoanTN\\MyApi.csproj": {
+    "D:\\tv\\DoanTN\\MyApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\DoanTN\\MyApi.csproj",
+        "projectUniqueName": "D:\\tv\\DoanTN\\MyApi.csproj",
         "projectName": "MyApi",
-        "projectPath": "D:\\DoanTN\\MyApi.csproj",
+        "projectPath": "D:\\tv\\DoanTN\\MyApi.csproj",
         "packagesPath": "C:\\Users\\Toan LK\\.nuget\\packages\\",
-        "outputPath": "D:\\DoanTN\\obj\\",
+        "outputPath": "D:\\tv\\DoanTN\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
