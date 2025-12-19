@@ -3,6 +3,7 @@
     public class BookResponse
     {
         public int Id { get; set; }
+
         public string? ThumbnailUrl { get; set; }
         public string? Title { get; set; }
         public string? Description { get; set; }
@@ -13,11 +14,19 @@
         public string? Publisher { get; set; }
         public int? YearPublished { get; set; }
         public int StockQuantity { get; set; } = 0;
+
+        // ⭐ ADD – PHỤC VỤ FE HIỂN THỊ
+        public string? AuthorName { get; set; }
+        public string? CategoryName { get; set; }
     }
 
     public class PagedBookResponse : PagedHttpResponse<BookResponse>
     {
-        public PagedBookResponse(IEnumerable<BookResponse> items, int totalItems, int? pageSize)
+        public PagedBookResponse(
+            IEnumerable<BookResponse> items,
+            int totalItems,
+            int? pageSize
+        )
         {
             TotalItems = totalItems;
             TotalPages = PaginationUtils.TotalPagesConversion(totalItems, pageSize);

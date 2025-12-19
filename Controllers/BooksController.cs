@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyApi.Model.Request;
-using MyApi.Services;
+using MyApi.Services.Books;
+using System.Threading.Tasks;
 
-namespace MyApi.Services.Books
+namespace MyApi.Controllers
 {
     [Route("api/book")]
+    [ApiController]
     public class BooksController : ControllerBase
     {
         private readonly IBookService _bookService;
@@ -14,60 +16,60 @@ namespace MyApi.Services.Books
         {
             _bookService = bookService;
         }
+
+        // GET: api/book?page=1&pageSize=10
         [Authorize("AdminOrUser")]
         [HttpGet]
-        public async Task<IActionResult> GetAllBooks(int? pageIndex, int? pageSize)
+        public async Task<IActionResult> GetAllBooks(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10
+        )
         {
-            var books = await _bookService.GetAllBooksAsync(pageIndex, pageSize);
-            return Ok(books);
+            var result = await _bookService.GetAllBooksAsync(page, pageSize);
+            return Ok(result);
         }
+
+        // POST: api/book
         [Authorize("AdminOnly")]
         [HttpPost]
-        public async Task<IActionResult> CreateBook(BookCreateRequest model)
+        public async Task<IActionResult> CreateBook(
+            [FromBody] BookCreateRequest model
+        )
         {
             var result = await _bookService.CreateBookAsync(model);
 
             if (result == null)
-                return BadRequest("Failed to create book");
+                return BadRequest(new { message = "Failed to create book" });
 
-            var response = new
-            {
-                Id = result.Id,
-                Message = result.Message
-            };
-
-            return Ok(response);
+            return Ok(result);
         }
 
+        // PUT: api/book
         [Authorize("AdminOnly")]
         [HttpPut]
-        public async Task<IActionResult> UpdateBook(BookUpdateRequest model)
+        public async Task<IActionResult> UpdateBook(
+            [FromBody] BookUpdateRequest model
+        )
         {
             var result = await _bookService.UpdateBookAsync(model);
 
             if (result == null)
-                return NotFound("Book not found");
+                return NotFound(new { message = "Book not found" });
 
-            var response = new
-            {
-                Id = result.Id,
-                Message = result.Message
-            };
-
-            return Ok(response);
+            return Ok(result);
         }
 
+        // DELETE: api/book/{id}
         [Authorize("AdminOnly")]
-        [HttpDelete]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBook(int id)
         {
-            var result = await _bookService.DeleteBookAsync(id);
+            var deleted = await _bookService.DeleteBookAsync(id);
 
-            if (!result)
+            if (!deleted)
                 return NotFound(new { message = "Book not found" });
 
             return Ok(new { message = "Book deleted successfully" });
         }
-
     }
 }

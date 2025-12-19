@@ -85,7 +85,7 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "MyApi.Services.Books.BooksController",
+    "ContainingType": "MyApi.Controllers.BooksController",
     "Method": "GetAllBooks",
     "RelativePath": "api/book",
     "HttpMethod": "GET",
@@ -93,20 +93,20 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "pageIndex",
-        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "Name": "page",
+        "Type": "System.Int32",
         "IsRequired": false
       },
       {
         "Name": "pageSize",
-        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "Type": "System.Int32",
         "IsRequired": false
       }
     ],
     "ReturnTypes": []
   },
   {
-    "ContainingType": "MyApi.Services.Books.BooksController",
+    "ContainingType": "MyApi.Controllers.BooksController",
     "Method": "CreateBook",
     "RelativePath": "api/book",
     "HttpMethod": "POST",
@@ -114,50 +114,15 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "Title",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "Description",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "ThumbnailUrl",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "AuthorId",
-        "Type": "System.Guid",
-        "IsRequired": false
-      },
-      {
-        "Name": "CategoryId",
-        "Type": "System.Int32",
-        "IsRequired": false
-      },
-      {
-        "Name": "Publisher",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "YearPublished",
-        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
-        "IsRequired": false
-      },
-      {
-        "Name": "StockQuantity",
-        "Type": "System.Int32",
-        "IsRequired": false
+        "Name": "model",
+        "Type": "MyApi.Model.Request.BookCreateRequest",
+        "IsRequired": true
       }
     ],
     "ReturnTypes": []
   },
   {
-    "ContainingType": "MyApi.Services.Books.BooksController",
+    "ContainingType": "MyApi.Controllers.BooksController",
     "Method": "UpdateBook",
     "RelativePath": "api/book",
     "HttpMethod": "PUT",
@@ -165,57 +130,17 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "Id",
-        "Type": "System.Int32",
-        "IsRequired": false
-      },
-      {
-        "Name": "Title",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "Description",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "ThumbnailUrl",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "AuthorId",
-        "Type": "System.Nullable\u00601[[System.Guid, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
-        "IsRequired": false
-      },
-      {
-        "Name": "CategoryId",
-        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
-        "IsRequired": false
-      },
-      {
-        "Name": "Publisher",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "YearPublished",
-        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
-        "IsRequired": false
-      },
-      {
-        "Name": "StockQuantity",
-        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
-        "IsRequired": false
+        "Name": "model",
+        "Type": "MyApi.Model.Request.BookUpdateRequest",
+        "IsRequired": true
       }
     ],
     "ReturnTypes": []
   },
   {
-    "ContainingType": "MyApi.Services.Books.BooksController",
+    "ContainingType": "MyApi.Controllers.BooksController",
     "Method": "DeleteBook",
-    "RelativePath": "api/book",
+    "RelativePath": "api/book/{id}",
     "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,
@@ -223,13 +148,13 @@
       {
         "Name": "id",
         "Type": "System.Int32",
-        "IsRequired": false
+        "IsRequired": true
       }
     ],
     "ReturnTypes": []
   },
   {
-    "ContainingType": "MyApi.Services.Categories.CategoryController",
+    "ContainingType": "MyApi.Controllers.CategoryController",
     "Method": "GetAllCategories",
     "RelativePath": "api/category",
     "HttpMethod": "GET",
@@ -237,20 +162,20 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "pageIndex",
-        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "Name": "page",
+        "Type": "System.Int32",
         "IsRequired": false
       },
       {
         "Name": "pageSize",
-        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "Type": "System.Int32",
         "IsRequired": false
       }
     ],
     "ReturnTypes": []
   },
   {
-    "ContainingType": "MyApi.Services.Categories.CategoryController",
+    "ContainingType": "MyApi.Controllers.CategoryController",
     "Method": "CreateCategory",
     "RelativePath": "api/category",
     "HttpMethod": "POST",
@@ -258,20 +183,15 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "Name",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "Description",
-        "Type": "System.String",
-        "IsRequired": false
+        "Name": "model",
+        "Type": "MyApi.Model.Request.CategoryCreateRequest",
+        "IsRequired": true
       }
     ],
     "ReturnTypes": []
   },
   {
-    "ContainingType": "MyApi.Services.Categories.CategoryController",
+    "ContainingType": "MyApi.Controllers.CategoryController",
     "Method": "UpdateCategory",
     "RelativePath": "api/category",
     "HttpMethod": "PUT",
@@ -279,27 +199,17 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "Id",
-        "Type": "System.Int32",
-        "IsRequired": false
-      },
-      {
-        "Name": "Name",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "Description",
-        "Type": "System.String",
-        "IsRequired": false
+        "Name": "model",
+        "Type": "MyApi.Model.Request.CategoryUpdateRequest",
+        "IsRequired": true
       }
     ],
     "ReturnTypes": []
   },
   {
-    "ContainingType": "MyApi.Services.Categories.CategoryController",
+    "ContainingType": "MyApi.Controllers.CategoryController",
     "Method": "DeleteCategory",
-    "RelativePath": "api/category",
+    "RelativePath": "api/category/{id}",
     "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,
@@ -307,7 +217,7 @@
       {
         "Name": "id",
         "Type": "System.Int32",
-        "IsRequired": false
+        "IsRequired": true
       }
     ],
     "ReturnTypes": []

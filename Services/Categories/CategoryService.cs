@@ -2,6 +2,9 @@
 using MyApi.Entities;
 using MyApi.Model.Request;
 using MyApi.Model.Response;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace MyApi.Services.Categories
 {
@@ -11,18 +14,20 @@ namespace MyApi.Services.Categories
 
         public CategoryService(AppDbContext db)
         {
-            _db = db;
+            _db = db ?? throw new ArgumentNullException(nameof(db));
         }
 
         public async Task<Category?> GetById(int id)
         {
             return await _db.Categories
-                .Include(c => c.Books) // include navigation nếu cần
+                .Include(c => c.Books)
                 .FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task<CategoryCreateResponse?> CreateCategoryAsync(CategoryCreateRequest request)
         {
+            if (request == null) return null;
+
             var category = new Category
             {
                 Name = request.Name,
@@ -42,12 +47,18 @@ namespace MyApi.Services.Categories
 
         public async Task<CategoryUpdateResponse?> UpdateCategoryAsync(CategoryUpdateRequest request)
         {
-            var category = await _db.Categories.FirstOrDefaultAsync(c => c.Id == request.Id);
-            if (category == null)
-                return null;
+            if (request == null) return null;
 
-            if (request.Name != null) category.Name = request.Name;
-            if (request.Description != null) category.Description = request.Description;
+            var category = await _db.Categories
+                .FirstOrDefaultAsync(c => c.Id == request.Id);
+
+            if (category == null) return null;
+
+            if (!string.IsNullOrWhiteSpace(request.Name))
+                category.Name = request.Name;
+
+            if (request.Description != null)
+                category.Description = request.Description;
 
             category.UpdatedAt = DateTime.UtcNow;
 
@@ -69,54 +80,41 @@ namespace MyApi.Services.Categories
             if (category == null)
                 return false;
 
-            // Optionally: prevent delete if has books (business rule)
-            // if (category.Books != null && category.Books.Any()) return false;
-
             _db.Categories.Remove(category);
             await _db.SaveChangesAsync();
             return true;
         }
 
-        public async Task<PagedCategoryResponse> GetAllCategoriesAsync(int? pageIndex, int? pageSize)
+        // ⭐ PAGINATION CHUẨN – KHÔNG TRẢ ALL DATA
+        public async Task<PagedCategoryResponse> GetAllCategoriesAsync(int page, int pageSize)
         {
-            var query = _db.Categories.AsQueryable();
+            if (page <= 0) page = 1;
+            if (pageSize <= 0) pageSize = 10;
+
+            var query = _db.Categories
+                .Include(c => c.Books)
+                .AsQueryable();
 
             var totalItems = await query.CountAsync();
 
-            // nếu pageIndex/pageSize không được cung cấp, trả toàn bộ
-            if (!pageIndex.HasValue || !pageSize.HasValue || pageSize.Value <= 0)
-            {
-                var all = await query
-                    .Include(c => c.Books)
-                    .ToListAsync();
-
-                var itemsAll = all.Select(c => new CategoryResponse
+            var items = await query
+                .OrderBy(c => c.Name)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(c => new CategoryResponse
                 {
                     Id = c.Id,
                     Name = c.Name,
                     Description = c.Description,
-                    BookCount = c.Books?.Count
-                }).ToList();
-
-                return new PagedCategoryResponse(itemsAll, totalItems, pageSize);
-            }
-
-            var skip = (pageIndex.Value - 1) * pageSize.Value;
-            var paged = await query
-                .Include(c => c.Books)
-                .Skip(skip)
-                .Take(pageSize.Value)
+                    BookCount = c.Books.Count
+                })
                 .ToListAsync();
 
-            var items = paged.Select(c => new CategoryResponse
-            {
-                Id = c.Id,
-                Name = c.Name,
-                Description = c.Description,
-                BookCount = c.Books?.Count
-            }).ToList();
-
-            return new PagedCategoryResponse(items, totalItems, pageSize);
+            return new PagedCategoryResponse(
+                items,
+                totalItems,
+                pageSize
+            );
         }
     }
 }

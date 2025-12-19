@@ -2,6 +2,9 @@
 using MyApi.Entities;
 using MyApi.Model.Request;
 using MyApi.Model.Response;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace MyApi.Services.Books
 {
@@ -11,19 +14,21 @@ namespace MyApi.Services.Books
 
         public BookService(AppDbContext db)
         {
-            _db = db;
+            _db = db ?? throw new ArgumentNullException(nameof(db));
         }
 
         public async Task<Book?> GetById(int id)
         {
             return await _db.Books
-                .Include(x => x.Author)
-                .Include(x => x.Category)
-                .FirstOrDefaultAsync(x => x.Id == id);
+                .Include(b => b.Author)
+                .Include(b => b.Category)
+                .FirstOrDefaultAsync(b => b.Id == id);
         }
 
         public async Task<BookCreateResponse?> CreateBookAsync(BookCreateRequest request)
         {
+            if (request == null) return null;
+
             var book = new Book
             {
                 Title = request.Title,
@@ -49,19 +54,34 @@ namespace MyApi.Services.Books
 
         public async Task<BookUpdateResponse?> UpdateBookAsync(BookUpdateRequest request)
         {
-            var book = await _db.Books.FirstOrDefaultAsync(x => x.Id == request.Id);
-            if (book == null)
-                return null;
+            if (request == null) return null;
 
-            // Update fields only if provided
-            if (request.Title != null) book.Title = request.Title;
-            if (request.Description != null) book.Description = request.Description;
-            if (request.ThumbnailUrl != null) book.ThumbnailUrl = request.ThumbnailUrl;
-            if (request.AuthorId.HasValue) book.AuthorId = request.AuthorId.Value;
-            if (request.CategoryId.HasValue) book.CategoryId = request.CategoryId.Value;
-            if (request.Publisher != null) book.Publisher = request.Publisher;
-            if (request.YearPublished.HasValue) book.YearPublished = request.YearPublished;
-            if (request.StockQuantity.HasValue) book.StockQuantity = request.StockQuantity.Value;
+            var book = await _db.Books.FirstOrDefaultAsync(b => b.Id == request.Id);
+            if (book == null) return null;
+
+            if (!string.IsNullOrWhiteSpace(request.Title))
+                book.Title = request.Title;
+
+            if (request.Description != null)
+                book.Description = request.Description;
+
+            if (request.ThumbnailUrl != null)
+                book.ThumbnailUrl = request.ThumbnailUrl;
+
+            if (request.AuthorId.HasValue)
+                book.AuthorId = request.AuthorId.Value;
+
+            if (request.CategoryId.HasValue)
+                book.CategoryId = request.CategoryId.Value;
+
+            if (request.Publisher != null)
+                book.Publisher = request.Publisher;
+
+            if (request.YearPublished.HasValue)
+                book.YearPublished = request.YearPublished;
+
+            if (request.StockQuantity.HasValue)
+                book.StockQuantity = request.StockQuantity.Value;
 
             book.UpdatedAt = DateTime.UtcNow;
 
@@ -73,40 +93,55 @@ namespace MyApi.Services.Books
                 Message = "Book updated successfully"
             };
         }
+
         public async Task<bool> DeleteBookAsync(int id)
         {
             var book = await _db.Books.FirstOrDefaultAsync(b => b.Id == id);
-
-            if (book == null)
-                return false;
+            if (book == null) return false;
 
             _db.Books.Remove(book);
             await _db.SaveChangesAsync();
-
             return true;
         }
 
-        public async Task<PagedBookResponse> GetAllBooksAsync(int? pageIndex, int? pageSize)
+        // ⭐ PAGINATION CHUẨN – QUERY LEVEL
+        public async Task<PagedBookResponse> GetAllBooksAsync(int page, int pageSize)
         {
-            var books = await _db.Books
-                .Include(x => x.Author)
-                .Include(x => x.Category)
-                .ToListAsync();
-           var bookResponse = books.Select(book => new BookResponse
-            {
-                Id = book.Id,
-                Title = book.Title,
-                Description = book.Description,
-                ThumbnailUrl = book.ThumbnailUrl,
-                AuthorId = book.AuthorId,
-                CategoryId = (int)book.CategoryId,
-                Publisher = book.Publisher,
-                YearPublished = book.YearPublished,
-                StockQuantity = book.StockQuantity
-            }).ToList();
-            var totalItems = books.Count();
-            return new PagedBookResponse(bookResponse, totalItems, pageSize);
+            if (page <= 0) page = 1;
+            if (pageSize <= 0) pageSize = 10;
 
+            var query = _db.Books
+                .Include(b => b.Author)
+                .Include(b => b.Category)
+                .AsQueryable();
+
+            var totalItems = await query.CountAsync();
+
+            var items = await query
+                .OrderByDescending(b => b.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(b => new BookResponse
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    Description = b.Description,
+                    ThumbnailUrl = b.ThumbnailUrl,
+                    AuthorId = b.AuthorId,
+                    CategoryId = b.CategoryId ?? 0,
+                    Publisher = b.Publisher,
+                    YearPublished = b.YearPublished,
+                    StockQuantity = b.StockQuantity,
+                    AuthorName = b.Author.FullName,
+                    CategoryName = b.Category.Name
+                })
+                .ToListAsync();
+
+            return new PagedBookResponse(
+                items,
+                totalItems,
+                pageSize
+            );
         }
     }
 }
