@@ -22,5 +22,6 @@ namespace MyApi.Services.Authors
 
         // ⭐ PAGINATION CHUẨN (page, pageSize)
         Task<AuthorPagedResponse> GetAllAuthorsAsync(int page, int pageSize);
+        Task<RegisterResponse?> RegisterAsync(RegisterRequest request);
     }
 }

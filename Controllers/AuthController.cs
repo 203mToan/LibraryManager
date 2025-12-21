@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MyApi.Model.Request;
 using MyApi.Services;
+using MyApi.Services.Authors;
 using MyApi.Services.Users;
 
 
@@ -10,10 +11,12 @@ namespace MyApi.Controllers
     {
         private IUserService _userService;
         private readonly TokenService _tokenGen;
-        public AuthController(IUserService userService, TokenService tokenService)
+        private readonly IAuthorService _authorService;
+        public AuthController(IUserService userService, TokenService tokenService, IAuthorService authorService)
         {
             _userService = userService;
             _tokenGen = tokenService;
+            _authorService = authorService;
         }
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequest model)
@@ -31,6 +34,18 @@ namespace MyApi.Controllers
                 RefreshToken = refreshToken
             };
             return Ok(loginResponse);
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(RegisterRequest model)
+        {
+            var existingUser = await _userService.GetByUsername(model.UserName);
+            if (existingUser != null)
+            {
+                return BadRequest("Username already exists");
+            }
+            var user = await _authorService.RegisterAsync(model);
+            return Ok(user);
         }
     }
 }
