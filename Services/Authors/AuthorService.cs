@@ -124,5 +124,55 @@ namespace MyApi.Services.Authors
                 pageSize
             );
         }
+
+        public async Task<RegisterResponse?> RegisterAsync(RegisterRequest request)
+        {
+            if (request == null) return null;
+
+            var email = request.Email.Trim();
+            var username = request.UserName.Trim();
+
+            // Validate tối thiểu
+            if (string.IsNullOrWhiteSpace(email) ||
+                string.IsNullOrWhiteSpace(username) ||
+                string.IsNullOrWhiteSpace(request.Password))
+                return null;
+
+            // Check trùng Email / UserName
+            var exists = await _db.Users.AnyAsync(u =>
+                u.Email.ToLower() == email.ToLower()
+                || u.UserName.ToLower() == username.ToLower()
+            );
+
+            if (exists)
+                throw new InvalidOperationException("User already exists");
+
+            var user = new User
+            {
+                Id = Guid.NewGuid(),
+                FullName = request.FullName.Trim(),
+                Email = email,
+                UserName = username,
+                PhoneNumber = request.PhoneNumber.Trim(),
+                Address = request.Address.Trim(),
+                DateOfBirth = request.DateOfBirth,
+                Gender = request.Gender,
+                NationalId = request.NationalId.Trim(),
+                CreatedAt = DateTime.UtcNow,
+                RoleId = 2 // Assuming '2' is the default role ID for regular users
+            };
+
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password); 
+
+            await _db.Users.AddAsync(user);
+            await _db.SaveChangesAsync();
+
+            return new RegisterResponse
+            {
+                UserId = user.Id,
+                Email = user.Email,
+                FullName = user.FullName
+            };
+        }
     }
 }
