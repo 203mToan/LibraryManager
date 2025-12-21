@@ -92,7 +92,7 @@ namespace MyApi.Services.Authors
         }
 
         // ⭐ PAGINATION CHUẨN – KHÔNG TRẢ ALL DATA
-        public async Task<PagedAuthorResponse> GetAllAuthorsAsync(int page, int pageSize)
+        public async Task<AuthorPagedResponse> GetAllAuthorsAsync(int page, int pageSize)
         {
             if (page <= 0) page = 1;
             if (pageSize <= 0) pageSize = 10;
@@ -118,7 +118,7 @@ namespace MyApi.Services.Authors
                 })
                 .ToListAsync();
 
-            return new PagedAuthorResponse(
+            return new AuthorPagedResponse(
                 items,
                 totalItems,
                 pageSize

@@ -71,5 +71,11 @@ namespace MyApi.Controllers
 
             return Ok(new { message = "Book deleted successfully" });
         }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var book = await _bookService.GetByIdAsync(id);
+            return Ok(book);
+        }
     }
 }

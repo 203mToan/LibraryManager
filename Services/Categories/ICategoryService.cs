@@ -20,6 +20,6 @@ namespace MyApi.Services.Categories
         Task<bool> DeleteCategoryAsync(int id);
 
         // ⭐ PAGINATION CHUẨN
-        Task<PagedCategoryResponse> GetAllCategoriesAsync(int page, int pageSize);
+        Task<CategoryPagedResponse> GetAllCategoriesAsync(int page, int pageSize);
     }
 }

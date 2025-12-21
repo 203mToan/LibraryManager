@@ -17,6 +17,9 @@ namespace MyApi.Services.Books
             _db = db ?? throw new ArgumentNullException(nameof(db));
         }
 
+        // =========================
+        // 1️⃣ HÀM CŨ – GIỮ NGUYÊN
+        // =========================
         public async Task<Book?> GetById(int id)
         {
             return await _db.Books
@@ -25,6 +28,37 @@ namespace MyApi.Services.Books
                 .FirstOrDefaultAsync(b => b.Id == id);
         }
 
+        // =========================
+        // 2️⃣ HÀM MỚI – CHO FE
+        // =========================
+        public async Task<BookResponse?> GetByIdAsync(int id)
+        {
+            var book = await _db.Books
+                .Include(b => b.Author)
+                .Include(b => b.Category)
+                .FirstOrDefaultAsync(b => b.Id == id);
+
+            if (book == null) return null;
+
+            return new BookResponse
+            {
+                Id = book.Id,
+                Title = book.Title,
+                Description = book.Description,
+                ThumbnailUrl = book.ThumbnailUrl,
+                AuthorId = book.AuthorId,
+                CategoryId = book.CategoryId ?? 0,
+                Publisher = book.Publisher,
+                YearPublished = book.YearPublished,
+                StockQuantity = book.StockQuantity,
+                AuthorName = book.Author.FullName,
+                CategoryName = book.Category.Name
+            };
+        }
+
+        // =========================
+        // 3️⃣ CREATE
+        // =========================
         public async Task<BookCreateResponse?> CreateBookAsync(BookCreateRequest request)
         {
             if (request == null) return null;
@@ -52,6 +86,9 @@ namespace MyApi.Services.Books
             };
         }
 
+        // =========================
+        // 4️⃣ UPDATE
+        // =========================
         public async Task<BookUpdateResponse?> UpdateBookAsync(BookUpdateRequest request)
         {
             if (request == null) return null;
@@ -84,7 +121,6 @@ namespace MyApi.Services.Books
                 book.StockQuantity = request.StockQuantity.Value;
 
             book.UpdatedAt = DateTime.UtcNow;
-
             await _db.SaveChangesAsync();
 
             return new BookUpdateResponse
@@ -94,6 +130,9 @@ namespace MyApi.Services.Books
             };
         }
 
+        // =========================
+        // 5️⃣ DELETE
+        // =========================
         public async Task<bool> DeleteBookAsync(int id)
         {
             var book = await _db.Books.FirstOrDefaultAsync(b => b.Id == id);
@@ -104,7 +143,9 @@ namespace MyApi.Services.Books
             return true;
         }
 
-        // ⭐ PAGINATION CHUẨN – QUERY LEVEL
+        // =========================
+        // 6️⃣ GET ALL – PAGINATION
+        // =========================
         public async Task<PagedBookResponse> GetAllBooksAsync(int page, int pageSize)
         {
             if (page <= 0) page = 1;
@@ -137,11 +178,7 @@ namespace MyApi.Services.Books
                 })
                 .ToListAsync();
 
-            return new PagedBookResponse(
-                items,
-                totalItems,
-                pageSize
-            );
+            return new PagedBookResponse(items, totalItems, pageSize);
         }
     }
 }

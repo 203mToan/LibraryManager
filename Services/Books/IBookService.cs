@@ -21,5 +21,7 @@ namespace MyApi.Services.Books
 
         // ⭐ PAGINATION CHUẨN
         Task<PagedBookResponse> GetAllBooksAsync(int page, int pageSize);
+        Task<BookResponse?> GetByIdAsync(int id);
+
     }
 }

@@ -5,13 +5,13 @@ using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
 using MyApi;
 using MyApi.Services;
+using MyApi.Services.Authors;
 using MyApi.Services.Books;
+using MyApi.Services.Categories;
+using MyApi.Services.Comments;
 using MyApi.Services.Identity;
 using MyApi.Services.Loans;
 using MyApi.Services.Users;
-using MyApi.Services.Categories;
-using MyApi.Services.Authors;
-
 using System.Text;
 
 
@@ -55,6 +55,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IAuthorService, AuthorService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
+
 
 
 

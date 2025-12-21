@@ -21,6 +21,6 @@ namespace MyApi.Services.Authors
         Task<bool> DeleteAuthorAsync(Guid id);
 
         // ⭐ PAGINATION CHUẨN (page, pageSize)
-        Task<PagedAuthorResponse> GetAllAuthorsAsync(int page, int pageSize);
+        Task<AuthorPagedResponse> GetAllAuthorsAsync(int page, int pageSize);
     }
 }

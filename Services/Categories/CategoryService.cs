@@ -86,7 +86,7 @@ namespace MyApi.Services.Categories
         }
 
         // ⭐ PAGINATION CHUẨN – KHÔNG TRẢ ALL DATA
-        public async Task<PagedCategoryResponse> GetAllCategoriesAsync(int page, int pageSize)
+        public async Task<CategoryPagedResponse> GetAllCategoriesAsync(int page, int pageSize)
         {
             if (page <= 0) page = 1;
             if (pageSize <= 0) pageSize = 10;
@@ -110,7 +110,7 @@ namespace MyApi.Services.Categories
                 })
                 .ToListAsync();
 
-            return new PagedCategoryResponse(
+            return new CategoryPagedResponse(
                 items,
                 totalItems,
                 pageSize
