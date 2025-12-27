@@ -9,6 +9,7 @@ using MyApi.Services.Authors;
 using MyApi.Services.Books;
 using MyApi.Services.Categories;
 using MyApi.Services.Comments;
+using MyApi.Services.FavoriteBooks;
 using MyApi.Services.Identity;
 using MyApi.Services.Loans;
 using MyApi.Services.Users;
@@ -56,6 +57,7 @@ builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IAuthorService, AuthorService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<IFavoriteBookService, FavoriteBookService>();
 
 
 

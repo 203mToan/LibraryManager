@@ -329,6 +329,38 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "MyApi.Controllers.FavoriteBookController",
+    "Method": "Add",
+    "RelativePath": "api/favorite",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "MyApi.Model.Request.FavoriteBookRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyApi.Controllers.FavoriteBookController",
+    "Method": "Remove",
+    "RelativePath": "api/favorite/{bookId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "bookId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "MyApi.Controllers.LoanController",
     "Method": "CreateLoan",
     "RelativePath": "api/Loan",
