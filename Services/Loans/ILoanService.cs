@@ -11,6 +11,7 @@ namespace MyApi.Services.Loans
         Task<LoanResponse?> ReturnBookAsync(int id, DateTime returnDate);
         Task<List<LoanResponse>> GetMyLoansAsync();
         Task<LoanResponse?> ApproveLoanAsync(int loanId);
+        Task<LoanResponse?> CancelLoanAsync(int loanId);
         Task<LoanResponse?> PayFineAsync(int loanId);
 
 

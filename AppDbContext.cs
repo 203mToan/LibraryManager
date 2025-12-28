@@ -35,6 +35,11 @@ namespace MyApi
             modelBuilder.Entity<Book>()
                 .Property(x => x.Id)
                 .ValueGeneratedOnAdd();
+
+            // Ensure Category.Id is configured as identity (value generated on add)
+            modelBuilder.Entity<Category>()
+                .Property(c => c.Id)
+                .ValueGeneratedOnAdd();
         }
     }
 }

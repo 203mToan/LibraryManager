@@ -24,13 +24,22 @@ namespace MyApi.Services.Loans
             var user = await _db.Users.FirstOrDefaultAsync(x => x.Id == request.UserId);
             if (user == null)
                 throw new Exception("User not found");
-            var loanOverDue = await _db.Loans
-                .Where(x => x.ReturnDate >= DateTime.Now || x.Status == LoanStatus.Overdue.ToString())
-                .FirstOrDefaultAsync();
-            if(loanOverDue != null)
+
+            // Load user's loans into memory and check overdue in-memory to avoid PostgreSQL timestamptz vs timestamp translation issues
+            var userLoans = await _db.Loans
+                .Where(x => x.UserId == request.UserId)
+                .ToListAsync();
+
+            var hasOverdue = userLoans.Any(x =>
+                x.Status == LoanStatus.Overdue.ToString() ||
+                (x.DueDate.HasValue && DateTime.UtcNow > x.DueDate.Value && x.Status == LoanStatus.Approved.ToString())
+            );
+
+            if (hasOverdue)
             {
                 throw new Exception("User has overdue loans");
             }
+
             var book = await _db.Books.FirstOrDefaultAsync(x => x.Id == request.BookId);
             if (book == null)
                 throw new Exception("Book not found");
@@ -54,6 +63,7 @@ namespace MyApi.Services.Loans
             var loans = await _db.Loans
                 .Include(x => x.User)
                 .Include(x => x.Book)
+                .OrderByDescending(x => x.LoanDate)
                 .ToListAsync();
             await UpdateOverdueStatusAsync(loans);
             return loans.Select(x => new LoanResponse().ToResponse(x)).ToList();
@@ -107,6 +117,7 @@ namespace MyApi.Services.Loans
                 .Where(x => x.UserId == userId.Value)
                 .Include(x => x.Book)
                 .Include(x => x.User)
+                .OrderByDescending(x => x.LoanDate)
                 .ToListAsync();
             await UpdateOverdueStatusAsync(loans);
             return loans.Select(x => new LoanResponse().ToResponse(x)).ToList();
@@ -132,6 +143,28 @@ namespace MyApi.Services.Loans
 
             return new LoanResponse().ToResponse(loan);
         }
+      
+        public async Task<LoanResponse?> CancelLoanAsync(int loanId)
+        {
+            var loan = await _db.Loans
+                .Include(x => x.Book)
+                .Include(x => x.User)
+                .FirstOrDefaultAsync(x => x.Id == loanId);
+
+            if (loan == null)
+                return null;
+
+            if (loan.Status != LoanStatus.Pending.ToString())
+                throw new Exception("Only pending loans can be approved.");
+
+            // Cập nhật trạng thái
+            loan.Status = LoanStatus.Cancelled.ToString();
+            loan.UpdatedAt = DateTime.UtcNow;
+
+            await _db.SaveChangesAsync();
+
+            return new LoanResponse().ToResponse(loan);
+        }
         private async Task UpdateOverdueStatusAsync(List<Loan> loans)
         {
             bool updated = false;
@@ -140,7 +173,7 @@ namespace MyApi.Services.Loans
             {
                 if (loan.Status == LoanStatus.Approved.ToString() &&
                     loan.DueDate.HasValue &&
-                    DateTime.Now > loan.DueDate.Value)
+                    DateTime.UtcNow > loan.DueDate.Value)
                 {
                     loan.Status = LoanStatus.Overdue.ToString();
                     loan.UpdatedAt = DateTime.UtcNow;

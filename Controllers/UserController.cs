@@ -16,7 +16,7 @@ namespace MyApi.Controllers
             _userService = userService;
         }
 
-        [Authorize("AdminOnly")]
+        //[Authorize("AdminOnly")]
         [HttpGet]
         public async Task<IActionResult> GetAllUser(int? pageIndex, int? pageSize)
         {
@@ -24,7 +24,7 @@ namespace MyApi.Controllers
             return Ok(result);
         }
 
-        [Authorize("AdminOnly")]
+        //[Authorize("AdminOnly")]
         [HttpPut]
         public async Task<IActionResult> ChangePasswordUser(Guid userId, string newPassword)
         {

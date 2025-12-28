@@ -175,7 +175,7 @@ namespace MyApi.Services.Books
                     YearPublished = b.YearPublished,
                     StockQuantity = b.StockQuantity,
                     AuthorName = b.Author.FullName,
-                    CategoryName = b.Category.Name
+                    CategoryName = b.Category.Name,
                 })
                 .ToListAsync();
 

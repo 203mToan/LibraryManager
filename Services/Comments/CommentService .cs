@@ -115,17 +115,36 @@ namespace MyApi.Services.Comments
             return true;
         }
 
-        // DELETE (CHỈ CHỦ COMMENT)
+        // DELETE (CHỈ CHỦ COMMENT hoặc ADMIN)
         public async Task<bool> DeleteAsync(Guid id, Guid userId)
         {
             var comment = await _db.Comments
-                .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
+                .FirstOrDefaultAsync(c => c.Id == id);
 
             if (comment == null) return false;
 
-            _db.Comments.Remove(comment);
-            await _db.SaveChangesAsync();
-            return true;
+            // If the requester is the owner, allow delete
+            if (comment.UserId == userId)
+            {
+                _db.Comments.Remove(comment);
+                await _db.SaveChangesAsync();
+                return true;
+            }
+
+            // Otherwise check if requester is admin
+            var user = await _db.Users
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user != null && user.Role != null &&
+                string.Equals(user.Role.Name, "Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                _db.Comments.Remove(comment);
+                await _db.SaveChangesAsync();
+                return true;
+            }
+
+            return false;
         }
     }
 }

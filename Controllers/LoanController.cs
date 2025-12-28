@@ -72,6 +72,17 @@ namespace MyApi.Controllers
 
             return Ok(result);
         }
+       
+        [HttpPut("cancel/{id}")]
+        public async Task<IActionResult> CancelLoan(int id)
+        {
+            var result = await _loanService.CancelLoanAsync(id);
+
+            if (result == null)
+                return NotFound(new { Message = "Loan not found" });
+
+            return Ok(result);
+        }
         [HttpPut("pay-fine/{id}")]
         public async Task<IActionResult> PayFine(int id)
         {
