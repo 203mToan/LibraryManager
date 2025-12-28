@@ -146,7 +146,7 @@ namespace MyApi.Services.Books
         // =========================
         // 6️⃣ GET ALL – PAGINATION
         // =========================
-        public async Task<PagedBookResponse> GetAllBooksAsync(int page, int pageSize)
+        public async Task<PagedBookResponse> GetAllBooksAsync(int page, int pageSize, int? categoryId)
         {
             if (page <= 0) page = 1;
             if (pageSize <= 0) pageSize = 10;
@@ -159,6 +159,7 @@ namespace MyApi.Services.Books
             var totalItems = await query.CountAsync();
 
             var items = await query
+                .Where(x => !categoryId.HasValue || x.CategoryId == categoryId.Value)
                 .OrderByDescending(b => b.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)

@@ -21,11 +21,13 @@ namespace MyApi.Controllers
         [Authorize("AdminOrUser")]
         [HttpGet]
         public async Task<IActionResult> GetAllBooks(
+            [FromQuery] int? categoryId,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10
+
         )
         {
-            var result = await _bookService.GetAllBooksAsync(page, pageSize);
+            var result = await _bookService.GetAllBooksAsync(page, pageSize, categoryId);
             return Ok(result);
         }
 

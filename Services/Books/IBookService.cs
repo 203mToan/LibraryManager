@@ -20,7 +20,7 @@ namespace MyApi.Services.Books
         Task<bool> DeleteBookAsync(int id);
 
         // ⭐ PAGINATION CHUẨN
-        Task<PagedBookResponse> GetAllBooksAsync(int page, int pageSize);
+        Task<PagedBookResponse> GetAllBooksAsync(int page, int pageSize, int? CatergoryId);
         Task<BookResponse?> GetByIdAsync(int id);
 
     }
