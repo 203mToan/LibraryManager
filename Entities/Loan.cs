@@ -21,6 +21,7 @@
         Pending,
         Approved,
         Returned,
-        Overdue
+        Overdue,
+        Cancelled,
     }
 }

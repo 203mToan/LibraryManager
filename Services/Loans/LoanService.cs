@@ -24,7 +24,13 @@ namespace MyApi.Services.Loans
             var user = await _db.Users.FirstOrDefaultAsync(x => x.Id == request.UserId);
             if (user == null)
                 throw new Exception("User not found");
-
+            var loanOverDue = await _db.Loans
+                .Where(x => x.ReturnDate >= DateTime.Now || x.Status == LoanStatus.Overdue.ToString())
+                .FirstOrDefaultAsync();
+            if(loanOverDue != null)
+            {
+                throw new Exception("User has overdue loans");
+            }
             var book = await _db.Books.FirstOrDefaultAsync(x => x.Id == request.BookId);
             if (book == null)
                 throw new Exception("Book not found");

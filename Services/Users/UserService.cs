@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyApi.Entities;
+using MyApi.Model.Response;
 using System;
 namespace MyApi.Services.Users
 {
@@ -68,6 +69,40 @@ namespace MyApi.Services.Users
             await MarkRefreshTokenAsUsed(oldToken);
 
             await SaveRefreshToken(oldToken.UserId, newToken);
+        }
+
+        public Task<User?> ChangePasswordUser(Guid userId, string newPassword)
+        {
+            var user = _db.Users.FirstOrDefault(u => u.Id == userId);
+            if (user == null) return Task.FromResult<User?>(null);
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            _db.SaveChanges();
+            return Task.FromResult<User?>(user);
+        }
+
+        public Task<PagedUserResponse> GetAllUsersAsync(int? pageIndex, int? pageSize)
+        {
+            var query = _db.Users.Include(u => u.Role).AsQueryable();
+            var totalItems = query.Count();
+            if (pageIndex.HasValue && pageSize.HasValue)
+            {
+                query = query
+                    .Skip((pageIndex.Value - 1) * pageSize.Value)
+                    .Take(pageSize.Value);
+            }
+            var users = query.ToList();
+            var userResponses = users.Select(u => new UserResponse
+            {
+                Id = u.Id,
+                FullName = u.FullName,
+                Email = u.Email,
+                UserName = u.UserName,
+                PhoneNumber = u.PhoneNumber,
+                Address = u.Address,
+                DateOfBirth = u.DateOfBirth,
+            });
+            var pagedResponse = new PagedUserResponse(userResponses,totalItems, pageSize);
+            return Task.FromResult(pagedResponse);
         }
     }
 
