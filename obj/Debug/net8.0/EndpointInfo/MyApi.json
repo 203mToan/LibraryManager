@@ -781,6 +781,149 @@
         }
       }
     },
+    "/api/FinePayment": {
+      "get": {
+        "tags": [
+          "FinePayment"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/FinePayment/by-date": {
+      "get": {
+        "tags": [
+          "FinePayment"
+        ],
+        "parameters": [
+          {
+            "name": "startDate",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/FinePayment/by-week": {
+      "get": {
+        "tags": [
+          "FinePayment"
+        ],
+        "parameters": [
+          {
+            "name": "week",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/FinePayment/by-month": {
+      "get": {
+        "tags": [
+          "FinePayment"
+        ],
+        "parameters": [
+          {
+            "name": "month",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/FinePayment/by-year": {
+      "get": {
+        "tags": [
+          "FinePayment"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/FinePayment/statistics": {
+      "get": {
+        "tags": [
+          "FinePayment"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Loan": {
       "post": {
         "tags": [

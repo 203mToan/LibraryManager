@@ -14,6 +14,7 @@
         // Navigation
         public User User { get; set; } = null!;
         public Book Book { get; set; } = null!;
+        public ICollection<FinePayment> FinePayments { get; set; } = new List<FinePayment>();
         public int FineAmount { get; set; } = 0;
     }
 

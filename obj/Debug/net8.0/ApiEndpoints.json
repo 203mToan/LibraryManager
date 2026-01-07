@@ -403,6 +403,105 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "MyApi.Controllers.FinePaymentController",
+    "Method": "GetAllFinePayments",
+    "RelativePath": "api/FinePayment",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyApi.Controllers.FinePaymentController",
+    "Method": "GetFinePaymentsByDate",
+    "RelativePath": "api/FinePayment/by-date",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "startDate",
+        "Type": "System.DateTime",
+        "IsRequired": false
+      },
+      {
+        "Name": "endDate",
+        "Type": "System.DateTime",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyApi.Controllers.FinePaymentController",
+    "Method": "GetFinePaymentsByMonth",
+    "RelativePath": "api/FinePayment/by-month",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "month",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "year",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyApi.Controllers.FinePaymentController",
+    "Method": "GetFinePaymentsByWeek",
+    "RelativePath": "api/FinePayment/by-week",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "week",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "year",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyApi.Controllers.FinePaymentController",
+    "Method": "GetFinePaymentsByYear",
+    "RelativePath": "api/FinePayment/by-year",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "year",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyApi.Controllers.FinePaymentController",
+    "Method": "GetFinePaymentStatistics",
+    "RelativePath": "api/FinePayment/statistics",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "MyApi.Controllers.LoanController",
     "Method": "CreateLoan",
     "RelativePath": "api/Loan",

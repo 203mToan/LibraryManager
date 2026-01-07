@@ -10,6 +10,7 @@ using MyApi.Services.Books;
 using MyApi.Services.Categories;
 using MyApi.Services.Comments;
 using MyApi.Services.FavoriteBooks;
+using MyApi.Services.FinePayments;
 using MyApi.Services.Identity;
 using MyApi.Services.Loans;
 using MyApi.Services.Notifications;
@@ -60,6 +61,7 @@ builder.Services.AddScoped<IAuthorService, AuthorService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IFavoriteBookService, FavoriteBookService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IFinePaymentService, FinePaymentService>();
 
 
 

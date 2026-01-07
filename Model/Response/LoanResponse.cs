@@ -18,20 +18,8 @@ namespace MyApi.Model.Response
 
         public LoanResponse ToResponse(Loan loan)
         {
-            dynamic fine = 0;
-            
-            // Tính tiền phạt cho các trạng thái Approved hoặc Overdue (chưa thanh toán)
-            if((loan.Status == LoanStatus.Approved.ToString() || loan.Status == LoanStatus.Overdue.ToString()) 
-               && loan.DueDate.HasValue && loan.DueDate < DateTime.UtcNow)
-            {
-                fine = CaculationFineAmount.CalculateFineAmount(loan.DueDate, DateTime.UtcNow);
-            }
-            
-            // Nếu đã thanh toán (Paid) hoặc có FineAmount trong DB, lấy số tiền từ database
-            if (loan.Status == LoanStatus.Paid.ToString() || loan.FineAmount > 0)
-            {
-                fine = loan.FineAmount;
-            }
+            // ✅ Chỉ lấy FineAmount từ database, không tính toán ở FE
+            int fine = loan.FineAmount;
             
             return new LoanResponse
             {
@@ -44,7 +32,7 @@ namespace MyApi.Model.Response
                 DueDate = loan.DueDate,
                 ReturnDate = loan.ReturnDate,
                 Status = loan.Status,
-                FineAmount = fine == 0 ? 0 : fine
+                FineAmount = fine
             };
         }
     }

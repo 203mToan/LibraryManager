@@ -16,6 +16,7 @@
         // Navigation
         public Role Role { get; set; }
         public ICollection<Loan> Loans { get; set; }
-        public ICollection<Notification> Notifications { get; set; } // ✅ Thêm dòng này
+        public ICollection<Notification> Notifications { get; set; }
+        public ICollection<FinePayment> FinePayments { get; set; } = new List<FinePayment>();
     }
 }

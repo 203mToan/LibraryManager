@@ -101,13 +101,15 @@ namespace MyApi.Services.Loans
             // Kiểm tra nếu trả muộn
             if (loan.DueDate.HasValue && returnDate > loan.DueDate.Value)
             {
-                // Tính tiền phạt và lưu vào database
-                loan.FineAmount = CaculationFineAmount.CalculateFineAmount(loan.DueDate.Value, returnDate);
+                // ✅ Tính tiền phạt: số ngày trễ × 20000đ
+                int overdueDays = (int)(returnDate - loan.DueDate.Value).TotalDays;
+                loan.FineAmount = overdueDays * 20000;
                 loan.Status = LoanStatus.Overdue.ToString(); // Đánh dấu quá hạn, chờ thanh toán
             }
             else
             {
                 loan.Status = LoanStatus.Returned.ToString(); // Trả đúng hạn
+                loan.FineAmount = 0; // Không có phạt
             }
             
             loan.UpdatedAt = DateTime.UtcNow;
@@ -208,9 +210,31 @@ namespace MyApi.Services.Loans
                     loan.DueDate.HasValue &&
                     DateTime.UtcNow > loan.DueDate.Value)
                 {
+                    // ✅ Khi chuyển sang Overdue, tính tiền phạt
                     loan.Status = LoanStatus.Overdue.ToString();
+                    
+                    // Tính tiền phạt: số ngày trễ × 20000đ
+                    int overdueDays = (int)(DateTime.UtcNow - loan.DueDate.Value).TotalDays;
+                    int fineAmount = overdueDays * 20000;
+                    
+                    loan.FineAmount = fineAmount;
                     loan.UpdatedAt = DateTime.UtcNow;
                     updated = true;
+                }
+                // ✅ Nếu đã là Overdue, cập nhật tiền phạt mỗi lần query
+                else if (loan.Status == LoanStatus.Overdue.ToString() && 
+                         loan.DueDate.HasValue)
+                {
+                    // Cập nhật tiền phạt theo số ngày trễ hiện tại
+                    int overdueDays = (int)(DateTime.UtcNow - loan.DueDate.Value).TotalDays;
+                    int fineAmount = overdueDays * 20000;
+                    
+                    if (loan.FineAmount != fineAmount)
+                    {
+                        loan.FineAmount = fineAmount;
+                        loan.UpdatedAt = DateTime.UtcNow;
+                        updated = true;
+                    }
                 }
             }
 
@@ -233,7 +257,7 @@ namespace MyApi.Services.Loans
             if (!loan.DueDate.HasValue)
                 throw new Exception("Loan does not have a due date.");
 
-            // ✅ Nếu đã thanh toán (Paid), trả về thông tin thay vì throw exception
+            // ✅ Nếu đã thanh toán (Paid), trả về thông tin
             if (loan.Status == LoanStatus.Paid.ToString())
             {
                 return new LoanResponse().ToResponse(loan);
@@ -242,6 +266,10 @@ namespace MyApi.Services.Loans
             // ✅ Chỉ cho phép thanh toán khi status là Overdue hoặc Returned
             if (loan.Status != LoanStatus.Overdue.ToString() && loan.Status != LoanStatus.Returned.ToString())
                 throw new Exception($"Cannot pay fine. Loan status is {loan.Status}. Only Overdue or Returned loans can pay fine.");
+
+            // ✅ Kiểm tra có tiền phạt không
+            if (loan.FineAmount <= 0)
+                throw new Exception("No fine to pay for this loan.");
 
             // ✅ Lưu thời gian trả sách thực tế khi user ấn thanh toán
             if (loan.ReturnDate == null)
@@ -270,6 +298,24 @@ namespace MyApi.Services.Loans
 
             if (loan.Status != LoanStatus.Paid.ToString())
                 throw new Exception("Only paid loans can be approved. Loan status must be 'Paid'.");
+
+            // ✅ Lưu doanh thu phạt vào bảng FinePayments
+            int fineAmount = loan.FineAmount;
+            if (fineAmount > 0)
+            {
+                var finePayment = new FinePayment
+                {
+                    UserId = loan.UserId,
+                    LoanId = loan.Id,
+                    Amount = fineAmount,
+                    PaymentDate = DateTime.UtcNow,
+                    PaymentMethod = "System",
+                    Description = $"Fine payment for book: {loan.Book.Title}",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                await _db.FinePayments.AddAsync(finePayment);
+            }
 
             // ✅ Admin duyệt thanh toán → chuyển về Returned và xóa tiền phạt
             loan.Status = LoanStatus.Returned.ToString();
