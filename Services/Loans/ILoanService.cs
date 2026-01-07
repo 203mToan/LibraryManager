@@ -13,7 +13,6 @@ namespace MyApi.Services.Loans
         Task<LoanResponse?> ApproveLoanAsync(int loanId);
         Task<LoanResponse?> CancelLoanAsync(int loanId);
         Task<LoanResponse?> PayFineAsync(int loanId);
-
-
+        Task<LoanResponse?> ApprovePaymentAsync(int loanId);
     }
 }

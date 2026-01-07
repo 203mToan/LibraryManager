@@ -14,15 +14,25 @@ namespace MyApi.Model.Response
         public DateTime? DueDate { get; set; }
         public DateTime? ReturnDate { get; set; }
         public int? FineAmount { get; set; }
-        public string? Status { get; set; }  // Pending / Approved / Returned / Overdue /Loaning
+        public string? Status { get; set; }  // Pending / Approved / Returned / Overdue / Cancelled / Paid
 
         public LoanResponse ToResponse(Loan loan)
         {
             dynamic fine = 0;
-            if((loan.Status == LoanStatus.Approved.ToString() || loan.Status == LoanStatus.Overdue.ToString()) && loan.DueDate < DateTime.Now)
+            
+            // Tính tiền phạt cho các trạng thái Approved hoặc Overdue (chưa thanh toán)
+            if((loan.Status == LoanStatus.Approved.ToString() || loan.Status == LoanStatus.Overdue.ToString()) 
+               && loan.DueDate.HasValue && loan.DueDate < DateTime.UtcNow)
             {
-                fine = CaculationFineAmount.CalculateFineAmount(loan.DueDate, DateTime.Now);
+                fine = CaculationFineAmount.CalculateFineAmount(loan.DueDate, DateTime.UtcNow);
             }
+            
+            // Nếu đã thanh toán (Paid) hoặc có FineAmount trong DB, lấy số tiền từ database
+            if (loan.Status == LoanStatus.Paid.ToString() || loan.FineAmount > 0)
+            {
+                fine = loan.FineAmount;
+            }
+            
             return new LoanResponse
             {
                 Id = loan.Id,

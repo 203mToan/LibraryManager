@@ -14,6 +14,7 @@
         // Navigation
         public User User { get; set; } = null!;
         public Book Book { get; set; } = null!;
+        public int FineAmount { get; set; } = 0;
     }
 
     public enum LoanStatus
@@ -23,5 +24,6 @@
         Returned,
         Overdue,
         Cancelled,
+        Paid,
     }
 }

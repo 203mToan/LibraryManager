@@ -1,4 +1,5 @@
 ﻿using MyApi.Entities;
+using MyApi.Model.Request;
 using MyApi.Model.Response;
 
 namespace MyApi.Services.Users
@@ -11,7 +12,13 @@ namespace MyApi.Services.Users
         Task SaveRefreshToken(Guid userId, string refreshToken);
         Task<RefreshTokens?> GetRefreshToken(string token);
         Task ReplaceRefreshToken(RefreshTokens oldToken, string newToken);
+
         Task<User?> ChangePasswordUser(Guid userId, string newPassword);
+
         Task<PagedUserResponse> GetAllUsersAsync(int? pageIndex, int? pageSize);
+
+        // ✅ NEW
+        Task<UserResponse?> GetUserByIdAsync(Guid userId);
+        Task<UserResponse?> UpdateUserAsync(Guid userId, UpdateUserRequest request);
     }
 }

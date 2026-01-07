@@ -446,6 +446,22 @@
   },
   {
     "ContainingType": "MyApi.Controllers.LoanController",
+    "Method": "ApprovePayment",
+    "RelativePath": "api/Loan/approve-payment/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyApi.Controllers.LoanController",
     "Method": "ApproveLoan",
     "RelativePath": "api/Loan/approve/{id}",
     "HttpMethod": "PUT",
@@ -488,22 +504,6 @@
   },
   {
     "ContainingType": "MyApi.Controllers.LoanController",
-    "Method": "PayFine",
-    "RelativePath": "api/Loan/pay-fine/{id}",
-    "HttpMethod": "PUT",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Int32",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "MyApi.Controllers.LoanController",
     "Method": "ReturnBook",
     "RelativePath": "api/Loan/return/{id}",
     "HttpMethod": "PUT",
@@ -518,6 +518,22 @@
       {
         "Name": "returnDate",
         "Type": "System.DateTime",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyApi.Controllers.LoanController",
+    "Method": "PayFine",
+    "RelativePath": "api/Loan/send-request-pay-fine/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
         "IsRequired": true
       }
     ],
@@ -547,7 +563,7 @@
   {
     "ContainingType": "MyApi.Controllers.UserController",
     "Method": "ChangePasswordUser",
-    "RelativePath": "api/User",
+    "RelativePath": "api/User/change-password",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
@@ -561,6 +577,32 @@
         "Name": "newPassword",
         "Type": "System.String",
         "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyApi.Controllers.UserController",
+    "Method": "GetMyProfile",
+    "RelativePath": "api/User/me",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyApi.Controllers.UserController",
+    "Method": "UpdateMyProfile",
+    "RelativePath": "api/User/me",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "MyApi.Model.Request.UpdateUserRequest",
+        "IsRequired": true
       }
     ],
     "ReturnTypes": []

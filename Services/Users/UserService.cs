@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyApi.Entities;
+using MyApi.Model.Request;
 using MyApi.Model.Response;
-using System;
+
 namespace MyApi.Services.Users
 {
-
     public class UserService : IUserService
     {
         private readonly AppDbContext _db;
@@ -27,11 +27,7 @@ namespace MyApi.Services.Users
             if (user == null) return null;
 
             var isValid = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
-            // Nếu dùng password hash thì thay bằng PasswordHasher
-            if (!isValid)
-                return null;
-
-            return user;
+            return isValid ? user : null;
         }
 
         public async Task SaveRefreshToken(Guid userId, string refreshToken)
@@ -57,40 +53,38 @@ namespace MyApi.Services.Users
                 .FirstOrDefaultAsync(x => x.Token == token && !x.IsUsed);
         }
 
-        public async Task MarkRefreshTokenAsUsed(RefreshTokens token)
-        {
-            token.IsUsed = true;
-            token.RevokedAt = DateTime.UtcNow;
-            await _db.SaveChangesAsync();
-        }
-
         public async Task ReplaceRefreshToken(RefreshTokens oldToken, string newToken)
         {
-            await MarkRefreshTokenAsUsed(oldToken);
+            oldToken.IsUsed = true;
+            oldToken.RevokedAt = DateTime.UtcNow;
 
             await SaveRefreshToken(oldToken.UserId, newToken);
         }
 
-        public Task<User?> ChangePasswordUser(Guid userId, string newPassword)
+        public async Task<User?> ChangePasswordUser(Guid userId, string newPassword)
         {
-            var user = _db.Users.FirstOrDefault(u => u.Id == userId);
-            if (user == null) return Task.FromResult<User?>(null);
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null) return null;
+
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
-            _db.SaveChanges();
-            return Task.FromResult<User?>(user);
+            await _db.SaveChangesAsync();
+            return user;
         }
 
-        public Task<PagedUserResponse> GetAllUsersAsync(int? pageIndex, int? pageSize)
+        public async Task<PagedUserResponse> GetAllUsersAsync(int? pageIndex, int? pageSize)
         {
             var query = _db.Users.Include(u => u.Role).AsQueryable();
-            var totalItems = query.Count();
+            var totalItems = await query.CountAsync();
+
             if (pageIndex.HasValue && pageSize.HasValue)
             {
                 query = query
                     .Skip((pageIndex.Value - 1) * pageSize.Value)
                     .Take(pageSize.Value);
             }
-            var users = query.ToList();
+
+            var users = await query.ToListAsync();
+
             var userResponses = users.Select(u => new UserResponse
             {
                 Id = u.Id,
@@ -100,10 +94,50 @@ namespace MyApi.Services.Users
                 PhoneNumber = u.PhoneNumber,
                 Address = u.Address,
                 DateOfBirth = u.DateOfBirth,
+                Gender = u.Gender,
+                NationalId = u.NationalId
             });
-            var pagedResponse = new PagedUserResponse(userResponses,totalItems, pageSize);
-            return Task.FromResult(pagedResponse);
+
+            return new PagedUserResponse(userResponses, totalItems, pageSize);
+        }
+
+        // =======================
+        // ✅ NEW FEATURES
+        // =======================
+
+        public async Task<UserResponse?> GetUserByIdAsync(Guid userId)
+        {
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null) return null;
+
+            return new UserResponse
+            {
+                Id = user.Id,
+                FullName = user.FullName,
+                Email = user.Email,
+                UserName = user.UserName,
+                PhoneNumber = user.PhoneNumber,
+                Address = user.Address,
+                DateOfBirth = user.DateOfBirth,
+                Gender = user.Gender,
+                NationalId = user.NationalId
+            };
+        }
+
+        public async Task<UserResponse?> UpdateUserAsync(Guid userId, UpdateUserRequest request)
+        {
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null) return null;
+
+            user.FullName = request.FullName ?? user.FullName;
+            user.PhoneNumber = request.PhoneNumber ?? user.PhoneNumber;
+            user.Address = request.Address ?? user.Address;
+            user.DateOfBirth = request.DateOfBirth ?? user.DateOfBirth;
+            user.Gender = request.Gender ?? user.Gender;
+
+            await _db.SaveChangesAsync();
+
+            return await GetUserByIdAsync(userId);
         }
     }
-
 }

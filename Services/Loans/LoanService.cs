@@ -75,10 +75,11 @@ namespace MyApi.Services.Loans
                 .Include(x => x.User)
                 .Include(x => x.Book)
                 .FirstOrDefaultAsync(x => x.Id == id);
-            var loans = new List<Loan> { loan! };
-            await UpdateOverdueStatusAsync(loans);
-
+                
             if (loan == null) return null;
+            
+            var loans = new List<Loan> { loan };
+            await UpdateOverdueStatusAsync(loans);
 
             return new LoanResponse().ToResponse(loan);
         }
@@ -92,11 +93,23 @@ namespace MyApi.Services.Loans
 
             if (loan == null) return null;
 
-            if (loan.Status == LoanStatus.Returned.ToString())
+            if (loan.Status == LoanStatus.Returned.ToString() || loan.Status == LoanStatus.Paid.ToString())
                 throw new Exception("Book already returned");
 
             loan.ReturnDate = returnDate;
-            loan.Status = LoanStatus.Returned.ToString();
+            
+            // Kiểm tra nếu trả muộn
+            if (loan.DueDate.HasValue && returnDate > loan.DueDate.Value)
+            {
+                // Tính tiền phạt và lưu vào database
+                loan.FineAmount = CaculationFineAmount.CalculateFineAmount(loan.DueDate.Value, returnDate);
+                loan.Status = LoanStatus.Overdue.ToString(); // Đánh dấu quá hạn, chờ thanh toán
+            }
+            else
+            {
+                loan.Status = LoanStatus.Returned.ToString(); // Trả đúng hạn
+            }
+            
             loan.UpdatedAt = DateTime.UtcNow;
 
             // Increase back the book quantity
@@ -106,6 +119,7 @@ namespace MyApi.Services.Loans
 
             return new LoanResponse().ToResponse(loan);
         }
+
         public async Task<List<LoanResponse>> GetMyLoansAsync()
         {
             var userId = _identity.GetUserId();
@@ -122,6 +136,7 @@ namespace MyApi.Services.Loans
             await UpdateOverdueStatusAsync(loans);
             return loans.Select(x => new LoanResponse().ToResponse(x)).ToList();
         }
+
         public async Task<LoanResponse?> ApproveLoanAsync(int loanId)
         {
             var loan = await _db.Loans
@@ -155,16 +170,20 @@ namespace MyApi.Services.Loans
                 return null;
 
             if (loan.Status != LoanStatus.Pending.ToString())
-                throw new Exception("Only pending loans can be approved.");
+                throw new Exception("Only pending loans can be cancelled.");
 
             // Cập nhật trạng thái
             loan.Status = LoanStatus.Cancelled.ToString();
             loan.UpdatedAt = DateTime.UtcNow;
+            
+            // Hoàn lại số lượng sách
+            loan.Book.StockQuantity += 1;
 
             await _db.SaveChangesAsync();
 
             return new LoanResponse().ToResponse(loan);
         }
+
         private async Task UpdateOverdueStatusAsync(List<Loan> loans)
         {
             bool updated = false;
@@ -186,6 +205,7 @@ namespace MyApi.Services.Loans
                 await _db.SaveChangesAsync();
             }
         }
+
         public async Task<LoanResponse?> PayFineAsync(int loanId)
         {
             var loan = await _db.Loans
@@ -198,11 +218,54 @@ namespace MyApi.Services.Loans
 
             if (!loan.DueDate.HasValue)
                 throw new Exception("Loan does not have a due date.");
-            loan.Status = LoanStatus.Returned.ToString();
+
+            // ✅ Nếu đã thanh toán (Paid), trả về thông tin thay vì throw exception
+            if (loan.Status == LoanStatus.Paid.ToString())
+            {
+                return new LoanResponse().ToResponse(loan);
+            }
+
+            // ✅ Chỉ cho phép thanh toán khi status là Overdue hoặc Returned
+            if (loan.Status != LoanStatus.Overdue.ToString() && loan.Status != LoanStatus.Returned.ToString())
+                throw new Exception($"Cannot pay fine. Loan status is {loan.Status}. Only Overdue or Returned loans can pay fine.");
+
+            // ✅ Lưu thời gian trả sách thực tế khi user ấn thanh toán
+            if (loan.ReturnDate == null)
+            {
+                loan.ReturnDate = DateTime.UtcNow;
+            }
+
+            // ✅ Cập nhật trạng thái thành Paid - chờ admin duyệt
+            loan.Status = LoanStatus.Paid.ToString();
             loan.UpdatedAt = DateTime.UtcNow;
+            
             await _db.SaveChangesAsync();
+            
             return new LoanResponse().ToResponse(loan);
         }
 
+        public async Task<LoanResponse?> ApprovePaymentAsync(int loanId)
+        {
+            var loan = await _db.Loans
+                .Include(x => x.Book)
+                .Include(x => x.User)
+                .FirstOrDefaultAsync(x => x.Id == loanId);
+
+            if (loan == null)
+                return null;
+
+            if (loan.Status != LoanStatus.Paid.ToString())
+                throw new Exception("Only paid loans can be approved. Loan status must be 'Paid'.");
+
+            // ✅ Admin duyệt thanh toán → chuyển về Returned và xóa tiền phạt
+            loan.Status = LoanStatus.Returned.ToString();
+            loan.FineAmount = 0; // Xóa tiền phạt
+            loan.UpdatedAt = DateTime.UtcNow;
+
+            await _db.SaveChangesAsync();
+
+            return new LoanResponse().ToResponse(loan);
+        }
     }
 }
+                            
