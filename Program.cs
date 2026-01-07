@@ -12,6 +12,7 @@ using MyApi.Services.Comments;
 using MyApi.Services.FavoriteBooks;
 using MyApi.Services.Identity;
 using MyApi.Services.Loans;
+using MyApi.Services.Notifications;
 using MyApi.Services.Users;
 using System.Text;
 
@@ -58,7 +59,7 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IAuthorService, AuthorService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IFavoriteBookService, FavoriteBookService>();
-
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 
 

@@ -22,6 +22,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="frontend\components\" />
+    <Folder Include="frontend\services\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
 

@@ -17,6 +17,7 @@ namespace MyApi
         public DbSet<FavoriteBook> FavoriteBooks { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Notification> Notifications { get; set; } // ✅ Thêm dòng này
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -31,6 +32,7 @@ namespace MyApi
             modelBuilder.Entity<Comment>();
             modelBuilder.Entity<FavoriteBook>();
             modelBuilder.Entity<Loan>();
+            modelBuilder.Entity<Notification>(); // ✅ Thêm dòng này
             modelBuilder.Entity<Author>();
             modelBuilder.Entity<Book>()
                 .Property(x => x.Id)

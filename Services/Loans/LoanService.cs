@@ -156,6 +156,20 @@ namespace MyApi.Services.Loans
 
             await _db.SaveChangesAsync();
 
+            // ✅ Tạo notification cho user
+            var notification = new Notification
+            {
+                UserId = loan.UserId,
+                Title = "Phê duyệt mượn sách",
+                Message = $"Yêu cầu mượn sách \"{loan.Book.Title}\" đã được phê duyệt.",
+                Type = NotificationType.LoanApproved.ToString(),
+                LoanId = loan.Id,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            await _db.Notifications.AddAsync(notification);
+            await _db.SaveChangesAsync();
+
             return new LoanResponse().ToResponse(loan);
         }
       
@@ -262,6 +276,20 @@ namespace MyApi.Services.Loans
             loan.FineAmount = 0; // Xóa tiền phạt
             loan.UpdatedAt = DateTime.UtcNow;
 
+            await _db.SaveChangesAsync();
+
+            // ✅ Tạo notification cho user
+            var notification = new Notification
+            {
+                UserId = loan.UserId,
+                Title = "Phê duyệt thanh toán phạt",
+                Message = $"Thanh toán phạt trễ hạn cho sách \"{loan.Book.Title}\" đã được duyệt.",
+                Type = NotificationType.PaymentApproved.ToString(),
+                LoanId = loan.Id,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            await _db.Notifications.AddAsync(notification);
             await _db.SaveChangesAsync();
 
             return new LoanResponse().ToResponse(loan);
