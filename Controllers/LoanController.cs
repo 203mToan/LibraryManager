@@ -199,5 +199,26 @@ namespace MyApi.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
+
+        /// <summary>
+        /// ✅ Lấy tóm tắt thống kê mượn sách theo tháng/năm
+        /// </summary>
+        [Authorize("AdminOnly")]
+        [HttpGet("summary/by-period")]
+        public async Task<IActionResult> GetLoanSummaryByPeriod([FromQuery] int year, [FromQuery] int? month = null)
+        {
+            try
+            {
+                if (month.HasValue && (month < 1 || month > 12))
+                    return BadRequest(new { Error = "Month must be between 1 and 12" });
+
+                var result = await _loanService.GetLoanSummaryByPeriodAsync(year, month);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
+        }
     }
 }

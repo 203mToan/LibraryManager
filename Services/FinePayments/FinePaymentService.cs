@@ -50,12 +50,15 @@ namespace MyApi.Services.FinePayments
 
         public async Task<FinePaymentReportResponse> GetAllFinePaymentsAsync()
         {
+            // ? Load t?t c? payments vào memory
             var payments = await _db.FinePayments
                 .Include(x => x.User)
                 .Include(x => x.Loan)
                 .ThenInclude(x => x.Book)
-                .OrderByDescending(x => x.PaymentDate)
                 .ToListAsync();
+
+            // ? Sort trong memory
+            payments = payments.OrderByDescending(x => x.PaymentDate).ToList();
 
             var response = new FinePaymentReportResponse
             {
@@ -80,21 +83,29 @@ namespace MyApi.Services.FinePayments
 
         public async Task<FinePaymentReportResponse> GetFinePaymentsByDateAsync(DateTime startDate, DateTime endDate)
         {
-            endDate = endDate.AddDays(1).AddSeconds(-1);
+            // ? Ensure UTC dates
+            startDate = startDate.Date;
+            endDate = endDate.Date.AddDays(1).AddSeconds(-1);
 
+            // ? Load t?t c? vào memory
             var payments = await _db.FinePayments
                 .Include(x => x.User)
                 .Include(x => x.Loan)
                 .ThenInclude(x => x.Book)
-                .Where(x => x.PaymentDate >= startDate && x.PaymentDate <= endDate)
-                .OrderByDescending(x => x.PaymentDate)
                 .ToListAsync();
+
+            // ? Filter trong memory
+            var filteredPayments = payments
+                .Where(x => x.PaymentDate.ToUniversalTime().Date >= startDate.Date &&
+                           x.PaymentDate.ToUniversalTime().Date <= endDate.Date)
+                .OrderByDescending(x => x.PaymentDate)
+                .ToList();
 
             var response = new FinePaymentReportResponse
             {
-                TotalPayments = payments.Count,
-                TotalAmount = payments.Sum(x => x.Amount),
-                Payments = payments.Select(x => new FinePaymentResponse
+                TotalPayments = filteredPayments.Count,
+                TotalAmount = filteredPayments.Sum(x => x.Amount),
+                Payments = filteredPayments.Select(x => new FinePaymentResponse
                 {
                     Id = x.Id,
                     UserId = x.UserId,
@@ -115,6 +126,7 @@ namespace MyApi.Services.FinePayments
         {
             var startDate = GetDateFromWeek(year, week);
             var endDate = startDate.AddDays(6);
+
             return await GetFinePaymentsByDateAsync(startDate, endDate);
         }
 
@@ -122,6 +134,7 @@ namespace MyApi.Services.FinePayments
         {
             var startDate = new DateTime(year, month, 1);
             var endDate = startDate.AddMonths(1).AddDays(-1);
+
             return await GetFinePaymentsByDateAsync(startDate, endDate);
         }
 
@@ -129,24 +142,30 @@ namespace MyApi.Services.FinePayments
         {
             var startDate = new DateTime(year, 1, 1);
             var endDate = new DateTime(year, 12, 31);
+
             return await GetFinePaymentsByDateAsync(startDate, endDate);
         }
 
         public async Task<FinePaymentReportResponse> GetUserFinePaymentsAsync(Guid userId)
         {
+            // ? Load t?t c? vào memory
             var payments = await _db.FinePayments
                 .Include(x => x.User)
                 .Include(x => x.Loan)
                 .ThenInclude(x => x.Book)
+                .ToListAsync();
+
+            // ? Filter trong memory
+            var userPayments = payments
                 .Where(x => x.UserId == userId)
                 .OrderByDescending(x => x.PaymentDate)
-                .ToListAsync();
+                .ToList();
 
             var response = new FinePaymentReportResponse
             {
-                TotalPayments = payments.Count,
-                TotalAmount = payments.Sum(x => x.Amount),
-                Payments = payments.Select(x => new FinePaymentResponse
+                TotalPayments = userPayments.Count,
+                TotalAmount = userPayments.Sum(x => x.Amount),
+                Payments = userPayments.Select(x => new FinePaymentResponse
                 {
                     Id = x.Id,
                     UserId = x.UserId,
@@ -171,25 +190,29 @@ namespace MyApi.Services.FinePayments
             var startOfMonth = new DateTime(now.Year, now.Month, 1);
             var startOfYear = new DateTime(now.Year, 1, 1);
 
-            var dailyTotal = await _db.FinePayments
-                .Where(x => x.PaymentDate >= startOfDay)
-                .SumAsync(x => x.Amount);
+            // ? Load t?t c? vào memory
+            var payments = await _db.FinePayments.ToListAsync();
 
-            var weeklyTotal = await _db.FinePayments
-                .Where(x => x.PaymentDate >= startOfWeek)
-                .SumAsync(x => x.Amount);
+            // ? Calculate trong memory
+            var dailyTotal = payments
+                .Where(x => x.PaymentDate.ToUniversalTime().Date >= startOfDay)
+                .Sum(x => x.Amount);
 
-            var monthlyTotal = await _db.FinePayments
-                .Where(x => x.PaymentDate >= startOfMonth)
-                .SumAsync(x => x.Amount);
+            var weeklyTotal = payments
+                .Where(x => x.PaymentDate.ToUniversalTime().Date >= startOfWeek)
+                .Sum(x => x.Amount);
 
-            var yearlyTotal = await _db.FinePayments
-                .Where(x => x.PaymentDate >= startOfYear)
-                .SumAsync(x => x.Amount);
+            var monthlyTotal = payments
+                .Where(x => x.PaymentDate.ToUniversalTime().Date >= startOfMonth.Date)
+                .Sum(x => x.Amount);
 
-            var byDate = await _db.FinePayments
-                .Where(x => x.PaymentDate >= startOfMonth)
-                .GroupBy(x => x.PaymentDate.Date)
+            var yearlyTotal = payments
+                .Where(x => x.PaymentDate.ToUniversalTime().Date >= startOfYear.Date)
+                .Sum(x => x.Amount);
+
+            var byDate = payments
+                .Where(x => x.PaymentDate.ToUniversalTime().Date >= startOfMonth.Date)
+                .GroupBy(x => x.PaymentDate.ToUniversalTime().Date)
                 .Select(g => new FinePaymentByDateResponse
                 {
                     Date = g.Key.ToString("yyyy-MM-dd"),
@@ -197,7 +220,7 @@ namespace MyApi.Services.FinePayments
                     Count = g.Count()
                 })
                 .OrderBy(x => x.Date)
-                .ToListAsync();
+                .ToList();
 
             return new FinePaymentStatisticsResponse
             {

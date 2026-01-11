@@ -340,6 +340,50 @@ namespace MyApi.Services.Loans
 
             return new LoanResponse().ToResponse(loan);
         }
+
+        public async Task<LoanSummaryResponse> GetLoanSummaryByPeriodAsync(int year, int? month = null)
+        {
+            DateTime startDate, endDate;
+
+            if (month.HasValue)
+            {
+                startDate = new DateTime(year, month.Value, 1);
+                endDate = startDate.AddMonths(1).AddDays(-1);
+            }
+            else
+            {
+                startDate = new DateTime(year, 1, 1);
+                endDate = new DateTime(year, 12, 31);
+            }
+
+            // ✅ Load tất cả loans vào memory
+            var loans = await _db.Loans
+                .Where(x => x.LoanDate.HasValue)
+                .ToListAsync();
+
+            // ✅ Filter theo period
+            var filteredLoans = loans
+                .Where(x => x.LoanDate.Value.ToUniversalTime().Date >= startDate.Date &&
+                           x.LoanDate.Value.ToUniversalTime().Date <= endDate.Date)
+                .ToList();
+
+            // ✅ Tính các stats
+            var totalLoans = filteredLoans.Count;
+            var approvingLoans = filteredLoans
+                .Count(x => x.Status == LoanStatus.Approved.ToString() ||
+                           x.Status == LoanStatus.Overdue.ToString() ||
+                           x.Status == LoanStatus.Paid.ToString());
+            var overdueLoans = filteredLoans
+                .Count(x => x.Status == LoanStatus.Overdue.ToString() ||
+                           x.Status == LoanStatus.Paid.ToString());
+
+            return new LoanSummaryResponse
+            {
+                TotalLoans = totalLoans,
+                ApprovingLoans = approvingLoans,
+                OverdueLoans = overdueLoans
+            };
+        }
     }
 }
                             

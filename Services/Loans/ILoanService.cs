@@ -14,5 +14,6 @@ namespace MyApi.Services.Loans
         Task<LoanResponse?> CancelLoanAsync(int loanId);
         Task<LoanResponse?> PayFineAsync(int loanId);
         Task<LoanResponse?> ApprovePaymentAsync(int loanId);
+        Task<LoanSummaryResponse> GetLoanSummaryByPeriodAsync(int year, int? month = null);
     }
 }

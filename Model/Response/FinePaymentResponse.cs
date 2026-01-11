@@ -35,4 +35,19 @@ namespace MyApi.Model.Response
         public int Total { get; set; }
         public int Count { get; set; }
     }
+
+    public class FinePaymentSummaryResponse
+    {
+        public int TotalFinePayments { get; set; }
+        public int TotalFineAmount { get; set; }
+        public int TotalLoans { get; set; }
+        public int OverdueLoans { get; set; }
+    }
+
+    public class LoanSummaryResponse
+    {
+        public int TotalLoans { get; set; }
+        public int ApprovingLoans { get; set; }
+        public int OverdueLoans { get; set; }
+    }
 }

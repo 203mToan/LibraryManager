@@ -14,6 +14,7 @@ using MyApi.Services.FinePayments;
 using MyApi.Services.Identity;
 using MyApi.Services.Loans;
 using MyApi.Services.Notifications;
+using MyApi.Services.Reports;
 using MyApi.Services.Users;
 using System.Text;
 
@@ -62,7 +63,11 @@ builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IFavoriteBookService, FavoriteBookService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IFinePaymentService, FinePaymentService>();
+builder.Services.AddScoped<ILoanReportService, LoanReportService>();
 
+// ⚠️ Background Job - Uncomment khi tạo xong 2 files BackgroundJobs/HostedServices
+// builder.Services.AddScoped<IOverdueUpdateService, OverdueUpdateService>();
+// builder.Services.AddHostedService<OverdueUpdateHostedService>();
 
 
 builder.Services.AddSingleton<TokenService>();
