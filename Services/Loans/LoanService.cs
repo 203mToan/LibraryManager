@@ -69,6 +69,49 @@ namespace MyApi.Services.Loans
             return loans.Select(x => new LoanResponse().ToResponse(x)).ToList();
         }
 
+        public async Task<PagedHttpResponse<LoanResponse>> GetAllLoansPagedAsync(int? pageIndex, int? pageSize, string? status = null)
+        {
+            // Query base
+            var query = _db.Loans
+                .Include(x => x.User)
+                .Include(x => x.Book)
+                .AsQueryable();
+
+            // Filter theo status nếu có
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                query = query.Where(x => x.Status == status);
+            }
+
+            // Đếm tổng số items
+            var totalItems = await query.CountAsync();
+
+            // Lấy tất cả để update overdue status
+            var allLoans = await query
+                .OrderByDescending(x => x.LoanDate)
+                .ToListAsync();
+            
+            await UpdateOverdueStatusAsync(allLoans);
+
+            // Áp dụng phân trang
+            IEnumerable<Loan> pagedLoans = allLoans;
+            if (pageIndex.HasValue && pageSize.HasValue && pageIndex > 0 && pageSize > 0)
+            {
+                pagedLoans = allLoans
+                    .Skip((pageIndex.Value - 1) * pageSize.Value)
+                    .Take(pageSize.Value);
+            }
+
+            var loanResponses = pagedLoans.Select(x => new LoanResponse().ToResponse(x));
+
+            return new PagedHttpResponse<LoanResponse>
+            {
+                TotalItems = totalItems,
+                TotalPages = PaginationUtils.TotalPagesConversion(totalItems, pageSize),
+                Items = loanResponses
+            };
+        }
+
         public async Task<LoanResponse?> GetLoanByIdAsync(int id)
         {
             var loan = await _db.Loans
@@ -137,6 +180,55 @@ namespace MyApi.Services.Loans
                 .ToListAsync();
             await UpdateOverdueStatusAsync(loans);
             return loans.Select(x => new LoanResponse().ToResponse(x)).ToList();
+        }
+
+        public async Task<PagedHttpResponse<LoanResponse>> GetMyLoansPagedAsync(int? pageIndex, int? pageSize, string? status = null)
+        {
+            var userId = _identity.GetUserId();
+
+            if (userId == null)
+                throw new Exception("Unauthorized");
+
+            // Query base
+            var query = _db.Loans
+                .Where(x => x.UserId == userId.Value)
+                .Include(x => x.Book)
+                .Include(x => x.User)
+                .AsQueryable();
+
+            // Filter theo status nếu có
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                query = query.Where(x => x.Status == status);
+            }
+
+            // Đếm tổng số items
+            var totalItems = await query.CountAsync();
+
+            // Lấy tất cả để update overdue status
+            var allLoans = await query
+                .OrderByDescending(x => x.LoanDate)
+                .ToListAsync();
+            
+            await UpdateOverdueStatusAsync(allLoans);
+
+            // Áp dụng phân trang
+            IEnumerable<Loan> pagedLoans = allLoans;
+            if (pageIndex.HasValue && pageSize.HasValue && pageIndex > 0 && pageSize > 0)
+            {
+                pagedLoans = allLoans
+                    .Skip((pageIndex.Value - 1) * pageSize.Value)
+                    .Take(pageSize.Value);
+            }
+
+            var loanResponses = pagedLoans.Select(x => new LoanResponse().ToResponse(x));
+
+            return new PagedHttpResponse<LoanResponse>
+            {
+                TotalItems = totalItems,
+                TotalPages = PaginationUtils.TotalPagesConversion(totalItems, pageSize),
+                Items = loanResponses
+            };
         }
 
         public async Task<LoanResponse?> ApproveLoanAsync(int loanId)
@@ -297,30 +389,18 @@ namespace MyApi.Services.Loans
                 return null;
 
             if (loan.Status != LoanStatus.Paid.ToString())
-                throw new Exception("Only paid loans can be approved. Loan status must be 'Paid'.");
+                throw new Exception("Only paid loans can be approved for return. Loan status must be 'Paid'.");
 
-            // ✅ Lưu doanh thu phạt vào bảng FinePayments
-            int fineAmount = loan.FineAmount;
-            if (fineAmount > 0)
-            {
-                var finePayment = new FinePayment
-                {
-                    UserId = loan.UserId,
-                    LoanId = loan.Id,
-                    Amount = fineAmount,
-                    PaymentDate = DateTime.UtcNow,
-                    PaymentMethod = "System",
-                    Description = $"Fine payment for book: {loan.Book.Title}",
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
-                await _db.FinePayments.AddAsync(finePayment);
-            }
-
-            // ✅ Admin duyệt thanh toán → chuyển về Returned và xóa tiền phạt
+            // ✅ Admin duyệt trả sách → chuyển về Returned
             loan.Status = LoanStatus.Returned.ToString();
-            loan.FineAmount = 0; // Xóa tiền phạt
+            loan.ReturnDate = DateTime.UtcNow; // Set ngày trả sách chính thức
             loan.UpdatedAt = DateTime.UtcNow;
+
+            // ✅ Hoàn lại số lượng sách vào kho
+            if (loan.Book != null)
+            {
+                loan.Book.StockQuantity += 1;
+            }
 
             await _db.SaveChangesAsync();
 
@@ -328,10 +408,11 @@ namespace MyApi.Services.Loans
             var notification = new Notification
             {
                 UserId = loan.UserId,
-                Title = "Phê duyệt thanh toán phạt",
-                Message = $"Thanh toán phạt trễ hạn cho sách \"{loan.Book.Title}\" đã được duyệt.",
+                Title = "Đã duyệt trả sách",
+                Message = $"Yêu cầu trả sách \"{loan.Book?.Title}\" đã được duyệt. Bạn có thể tiếp tục mượn sách mới.",
                 Type = NotificationType.PaymentApproved.ToString(),
                 LoanId = loan.Id,
+                IsRead = false,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };

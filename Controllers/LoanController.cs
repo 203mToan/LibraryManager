@@ -35,13 +35,19 @@ namespace MyApi.Controllers
         }
 
         /// <summary>
-        /// Lấy danh sách tất cả các khoản mượn (Admin only)
+        /// Lấy danh sách tất cả các khoản mượn với phân trang (Admin only)
         /// </summary>
+        /// <param name="pageIndex">Trang hiện tại (bắt đầu từ 1)</param>
+        /// <param name="pageSize">Số items mỗi trang</param>
+        /// <param name="status">Filter theo status: Pending, Approved, Overdue, Paid, Returned, Cancelled</param>
         [Authorize("AdminOnly")]
         [HttpGet]
-        public async Task<IActionResult> GetAllLoans()
+        public async Task<IActionResult> GetAllLoans(
+            [FromQuery] int? pageIndex = 1, 
+            [FromQuery] int? pageSize = 10,
+            [FromQuery] string? status = null)
         {
-            var result = await _loanService.GetAllLoansAsync();
+            var result = await _loanService.GetAllLoansPagedAsync(pageIndex, pageSize, status);
             return Ok(result);
         }
 
@@ -83,15 +89,21 @@ namespace MyApi.Controllers
         }
 
         /// <summary>
-        /// Lấy danh sách các khoản mượn của người dùng hiện tại
+        /// Lấy danh sách các khoản mượn của người dùng hiện tại với phân trang
         /// </summary>
+        /// <param name="pageIndex">Trang hiện tại (bắt đầu từ 1)</param>
+        /// <param name="pageSize">Số items mỗi trang</param>
+        /// <param name="status">Filter theo status: Pending, Approved, Overdue, Paid, Returned, Cancelled</param>
         [Authorize("AdminOrUser")]
         [HttpGet("my")]
-        public async Task<IActionResult> GetMyLoans()
+        public async Task<IActionResult> GetMyLoans(
+            [FromQuery] int? pageIndex = 1, 
+            [FromQuery] int? pageSize = 10,
+            [FromQuery] string? status = null)
         {
             try
             {
-                var result = await _loanService.GetMyLoansAsync();
+                var result = await _loanService.GetMyLoansPagedAsync(pageIndex, pageSize, status);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -173,9 +185,9 @@ namespace MyApi.Controllers
         }   
 
         /// <summary>
-        /// Admin duyệt thanh toán tiền phạt
+        /// Admin duyệt trả sách (sau khi user đã thanh toán)
         /// </summary>
-        [Authorize("AdminOrUser")]
+        [Authorize("AdminOnly")]
         [HttpPut("approve-payment/{id}")]
         public async Task<IActionResult> ApprovePayment(int id)
         {
@@ -188,9 +200,8 @@ namespace MyApi.Controllers
 
                 return Ok(new 
                 { 
-                    Message = "Payment approved successfully. Loan returned.",
+                    Message = "Return approved successfully. Book returned to stock.",
                     Status = result.Status,
-                    FineAmount = result.FineAmount,
                     Loan = result
                 });
             }
@@ -201,7 +212,7 @@ namespace MyApi.Controllers
         }
 
         /// <summary>
-        /// ✅ Lấy tóm tắt thống kê mượn sách theo tháng/năm
+        /// Lấy tóm tắt thống kê mượn sách theo tháng/năm
         /// </summary>
         [Authorize("AdminOnly")]
         [HttpGet("summary/by-period")]

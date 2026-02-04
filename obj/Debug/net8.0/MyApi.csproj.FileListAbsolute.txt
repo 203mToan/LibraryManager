@@ -352,3 +352,4 @@ D:\tv\DoanTN\obj\Debug\net8.0\refint\MyApi.dll
 D:\tv\DoanTN\obj\Debug\net8.0\MyApi.pdb
 D:\tv\DoanTN\obj\Debug\net8.0\MyApi.genruntimeconfig.cache
 D:\tv\DoanTN\obj\Debug\net8.0\ref\MyApi.dll
+D:\tv\DoanTN\bin\Debug\net8.0\MyApi.staticwebassets.runtime.json

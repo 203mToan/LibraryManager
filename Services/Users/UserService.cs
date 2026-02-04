@@ -139,5 +139,61 @@ namespace MyApi.Services.Users
 
             return await GetUserByIdAsync(userId);
         }
+
+        // =======================
+        // ✅ CHECK DUPLICATE FIELDS
+        // =======================
+
+        public async Task<bool> IsUsernameExistsAsync(string username, Guid? excludeUserId = null)
+        {
+            if (string.IsNullOrWhiteSpace(username))
+                return false;
+
+            var query = _db.Users.Where(u => u.UserName == username);
+            
+            if (excludeUserId.HasValue)
+                query = query.Where(u => u.Id != excludeUserId.Value);
+
+            return await query.AnyAsync();
+        }
+
+        public async Task<bool> IsEmailExistsAsync(string email, Guid? excludeUserId = null)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return false;
+
+            var query = _db.Users.Where(u => u.Email == email);
+            
+            if (excludeUserId.HasValue)
+                query = query.Where(u => u.Id != excludeUserId.Value);
+
+            return await query.AnyAsync();
+        }
+
+        public async Task<bool> IsPhoneExistsAsync(string phone, Guid? excludeUserId = null)
+        {
+            if (string.IsNullOrWhiteSpace(phone))
+                return false;
+
+            var query = _db.Users.Where(u => u.PhoneNumber == phone);
+            
+            if (excludeUserId.HasValue)
+                query = query.Where(u => u.Id != excludeUserId.Value);
+
+            return await query.AnyAsync();
+        }
+
+        public async Task<bool> IsNationalIdExistsAsync(string nationalId, Guid? excludeUserId = null)
+        {
+            if (string.IsNullOrWhiteSpace(nationalId))
+                return false;
+
+            var query = _db.Users.Where(u => u.NationalId == nationalId);
+            
+            if (excludeUserId.HasValue)
+                query = query.Where(u => u.Id != excludeUserId.Value);
+
+            return await query.AnyAsync();
+        }
     }
 }

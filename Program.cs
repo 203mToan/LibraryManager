@@ -14,9 +14,12 @@ using MyApi.Services.FinePayments;
 using MyApi.Services.Identity;
 using MyApi.Services.Loans;
 using MyApi.Services.Notifications;
+using MyApi.Services.Payments;
 using MyApi.Services.Reports;
 using MyApi.Services.Users;
+using MyApi.Services.VnPay;
 using System.Text;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -53,6 +56,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpClient();
 builder.Services.AddScoped<IIdentityService, IdentityService>();
 builder.Services.AddScoped<ILoanService, LoanService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -64,6 +68,9 @@ builder.Services.AddScoped<IFavoriteBookService, FavoriteBookService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IFinePaymentService, FinePaymentService>();
 builder.Services.AddScoped<ILoanReportService, LoanReportService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+//Connect VNPay API
+builder.Services.AddScoped<IVnPayService, VnPayService>();
 
 // ⚠️ Background Job - Uncomment khi tạo xong 2 files BackgroundJobs/HostedServices
 // builder.Services.AddScoped<IOverdueUpdateService, OverdueUpdateService>();
@@ -116,6 +123,7 @@ using (var scope = app.Services.CreateScope())
 }
 app.UseSwagger();
 app.UseSwaggerUI();
+
 // Configure the HTTP request pipeline.
 app.UseHttpsRedirection();
 app.UseCors("MyCorsPolicy");
@@ -124,4 +132,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
 app.Run();

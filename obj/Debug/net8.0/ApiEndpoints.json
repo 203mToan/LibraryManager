@@ -493,6 +493,64 @@
   },
   {
     "ContainingType": "MyApi.Controllers.FinePaymentController",
+    "Method": "CheckFineAmount",
+    "RelativePath": "api/FinePayment/check-fine/{loanId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "loanId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyApi.Controllers.FinePaymentController",
+    "Method": "InitiateVNPayPayment",
+    "RelativePath": "api/FinePayment/initiate-vnpay-payment",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "MyApi.Model.Request.InitiateFinePaymentRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyApi.Controllers.FinePaymentController",
+    "Method": "GetMyPayments",
+    "RelativePath": "api/FinePayment/my-payments",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyApi.Controllers.FinePaymentController",
+    "Method": "GetPaymentStatus",
+    "RelativePath": "api/FinePayment/payment-status/{orderId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "orderId",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyApi.Controllers.FinePaymentController",
     "Method": "GetFinePaymentStatistics",
     "RelativePath": "api/FinePayment/statistics",
     "HttpMethod": "GET",
@@ -524,7 +582,23 @@
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [],
+    "Parameters": [
+      {
+        "Name": "pageIndex",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageSize",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "status",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
     "ReturnTypes": []
   },
   {
@@ -598,7 +672,23 @@
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [],
+    "Parameters": [
+      {
+        "Name": "pageIndex",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageSize",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "status",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
     "ReturnTypes": []
   },
   {
@@ -716,6 +806,88 @@
     "Method": "GetUnreadNotifications",
     "RelativePath": "api/Notification/unread",
     "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyApi.Controllers.PaymentController",
+    "Method": "CreatePaymentUrl",
+    "RelativePath": "api/Payment/create-payment-url",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "MyApi.Model.Request.PaymentInformationModel",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyApi.Controllers.PaymentController",
+    "Method": "CreatePaymentUrlApiAsync",
+    "RelativePath": "api/Payment/create-payment-url-api",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "MyApi.Model.Request.VnPayApiPaymentRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyApi.Controllers.PaymentController",
+    "Method": "PaymentCallback",
+    "RelativePath": "api/Payment/payment-callback",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyApi.Controllers.PaymentController",
+    "Method": "PaymentCallbackVnpay",
+    "RelativePath": "api/Payment/payment-callback-vnpay",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyApi.Controllers.PaymentController",
+    "Method": "PaymentIPN",
+    "RelativePath": "api/Payment/payment-ipn",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyApi.Controllers.PaymentController",
+    "Method": "PaymentIPN",
+    "RelativePath": "api/Payment/payment-ipn",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyApi.Controllers.PaymentController",
+    "Method": "VerifyPayment",
+    "RelativePath": "api/Payment/verify-payment",
+    "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [],
@@ -863,6 +1035,70 @@
         "Name": "newPassword",
         "Type": "System.String",
         "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyApi.Controllers.UserController",
+    "Method": "CheckEmail",
+    "RelativePath": "api/User/check-email/{email}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "email",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyApi.Controllers.UserController",
+    "Method": "CheckNationalId",
+    "RelativePath": "api/User/check-nationalid/{nationalId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "nationalId",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyApi.Controllers.UserController",
+    "Method": "CheckPhone",
+    "RelativePath": "api/User/check-phone/{phone}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "phone",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyApi.Controllers.UserController",
+    "Method": "CheckUsername",
+    "RelativePath": "api/User/check-username/{username}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "username",
+        "Type": "System.String",
+        "IsRequired": true
       }
     ],
     "ReturnTypes": []

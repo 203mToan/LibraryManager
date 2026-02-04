@@ -18,7 +18,8 @@ namespace MyApi
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Notification> Notifications { get; set; }
-        public DbSet<FinePayment> FinePayments { get; set; } // ✅ Thêm dòng này
+        public DbSet<FinePayment> FinePayments { get; set; }
+        public DbSet<Payment> Payments { get; set; } // ✅ Thêm Payment DbSet
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -34,7 +35,8 @@ namespace MyApi
             modelBuilder.Entity<FavoriteBook>();
             modelBuilder.Entity<Loan>();
             modelBuilder.Entity<Notification>();
-            modelBuilder.Entity<FinePayment>(); // ✅ Thêm dòng này
+            modelBuilder.Entity<FinePayment>();
+            modelBuilder.Entity<Payment>(); // ✅ Thêm Payment configuration
             modelBuilder.Entity<Author>();
             modelBuilder.Entity<Book>()
                 .Property(x => x.Id)
@@ -44,6 +46,26 @@ namespace MyApi
             modelBuilder.Entity<Category>()
                 .Property(c => c.Id)
                 .ValueGeneratedOnAdd();
+
+            // ✅ Configure Payment entity
+            modelBuilder.Entity<Payment>()
+                .HasKey(p => p.Id);
+
+            modelBuilder.Entity<Payment>()
+                .HasIndex(p => p.OrderId)
+                .IsUnique();
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.User)
+                .WithMany()
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.Loan)
+                .WithMany()
+                .HasForeignKey(p => p.LoanId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

@@ -20,5 +20,11 @@ namespace MyApi.Services.Users
         // ✅ NEW
         Task<UserResponse?> GetUserByIdAsync(Guid userId);
         Task<UserResponse?> UpdateUserAsync(Guid userId, UpdateUserRequest request);
+
+        // ✅ Check duplicate fields
+        Task<bool> IsUsernameExistsAsync(string username, Guid? excludeUserId = null);
+        Task<bool> IsEmailExistsAsync(string email, Guid? excludeUserId = null);
+        Task<bool> IsPhoneExistsAsync(string phone, Guid? excludeUserId = null);
+        Task<bool> IsNationalIdExistsAsync(string nationalId, Guid? excludeUserId = null);
     }
 }
