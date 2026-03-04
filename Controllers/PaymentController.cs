@@ -25,12 +25,6 @@ namespace MyApi.Controllers
             _logger = logger;
             _configuration = configuration;
         }
-
-        /// <summary>
-        /// Create payment URL - Traditional redirect method
-        /// </summary>
-        /// <param name="model">Payment information</param>
-        /// <returns>Redirect to VnPay payment page</returns>
         [HttpPost("create-payment-url")]
         public IActionResult CreatePaymentUrl([FromBody] PaymentInformationModel model)
         {
@@ -40,13 +34,6 @@ namespace MyApi.Controllers
             var url = _vnPayService.CreatePaymentUrl(model, HttpContext);
             return Ok(new { paymentUrl = url });
         }
-
-        /// <summary>
-        /// Create payment URL - API method for Dev Environment
-        /// POST /api/payment/create-payment-url-api
-        /// </summary>
-        /// <param name="request">VnPay API payment request</param>
-        /// <returns>Payment URL</returns>
         [HttpPost("create-payment-url-api")]
         public async Task<IActionResult> CreatePaymentUrlApiAsync([FromBody] VnPayApiPaymentRequest request)
         {
@@ -57,8 +44,6 @@ namespace MyApi.Controllers
                     Message = "OrderId hoặc Amount không hợp lệ",
                     Success = false
                 });
-
-            // Get client IP
             var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
             request.IpAddr = ipAddress;
 
@@ -67,13 +52,6 @@ namespace MyApi.Controllers
             var response = await _vnPayService.CreatePaymentUrlAsync(request);
             return Ok(response);
         }
-
-        /// <summary>
-        /// Payment callback - Return URL (User browser redirect)
-        /// </summary>
-        /// <remarks>
-        /// VNPay redirect user về endpoint này. Backend xử lý và redirect về Frontend.
-        /// </remarks>
         [HttpGet("payment-callback")]
         public async Task<IActionResult> PaymentCallback()
         {
@@ -83,49 +61,34 @@ namespace MyApi.Controllers
                 Console.WriteLine($"QueryString: {Request.QueryString}");
                 
                 _logger.LogInformation($"PaymentCallback: Received request from {Request.QueryString}");
-
-                // Log all parameters for debugging
                 foreach (var param in Request.Query)
                 {
                     Console.WriteLine($"  {param.Key} = {param.Value}");
                     _logger.LogInformation($"  {param.Key} = {param.Value}");
                 }
-
-                // ✅ Xử lý payment và update database
                 var response = await _vnPayService.PaymentExecuteAsync(Request.Query);
                 
                 Console.WriteLine($"Response received: Success={response?.Success}, Code={response?.VnPayResponseCode}");
-                
-                // ✅ Lấy thông tin từ VNPay response
                 var vnpResponseCode = Request.Query["vnp_ResponseCode"].ToString();
                 var vnpTxnRef = Request.Query["vnp_TxnRef"].ToString();
                 var vnpTransactionNo = Request.Query["vnp_TransactionNo"].ToString();
                 var vnpAmount = Request.Query["vnp_Amount"].ToString();
                 var isSuccess = response?.Success == true && vnpResponseCode == "00";
-                
-                // ✅ Đảm bảo orderId không null
                 var orderId = !string.IsNullOrEmpty(response?.OrderId) ? response.OrderId : vnpTxnRef;
-                
-                // ✅ Tính amount thực tế (VNPay trả về đơn vị x100)
                 var amountDisplay = "0";
                 if (long.TryParse(vnpAmount, out var amountValue))
                 {
                     amountDisplay = (amountValue / 100).ToString("N0");
                 }
-                
-                // ✅ Lấy Frontend URL từ config
                 var frontendUrl = _configuration["Frontend:Url"];
                 
                 if (!string.IsNullOrEmpty(frontendUrl))
                 {
-                    // ✅ Redirect về trang myloans với đầy đủ thông tin
                     var queryParams = $"payment={(isSuccess ? "success" : "failed")}&orderId={Uri.EscapeDataString(orderId)}&transactionNo={Uri.EscapeDataString(vnpTransactionNo)}&amount={Uri.EscapeDataString(amountDisplay)}";
                     var myLoansUrl = $"{frontendUrl}/myloans?{queryParams}";
                     _logger.LogInformation($"PaymentCallback: Redirecting to myloans: {myLoansUrl}");
                     return Redirect(myLoansUrl);
                 }
-                
-                // Fallback nếu không có Frontend URL
                 return Redirect($"/payment-result.html?success={isSuccess.ToString().ToLower()}&orderId={Uri.EscapeDataString(orderId)}");
             }
             catch (Exception ex)
@@ -142,10 +105,6 @@ namespace MyApi.Controllers
                 return Redirect($"/payment-result.html?success=false&error={Uri.EscapeDataString(ex.Message)}");
             }
         }
-
-        /// <summary>
-        /// Get VNPay error message by code
-        /// </summary>
         private string GetVnPayErrorMessage(string code)
         {
             var messages = new Dictionary<string, string>
@@ -168,12 +127,6 @@ namespace MyApi.Controllers
             
             return messages.TryGetValue(code ?? "", out var message) ? message : "Giao dịch thất bại";
         }
-
-        /// <summary>
-        /// Verify payment - IPN URL (Server to server)
-        /// POST /api/payment/verify-payment
-        /// </summary>
-        /// <returns>Verification result</returns>
         [HttpPost("verify-payment")]
         public async Task<IActionResult> VerifyPayment()
         {
@@ -181,10 +134,6 @@ namespace MyApi.Controllers
             var response = await _vnPayService.VerifyPaymentAsync(Request.Query);
             return Ok(response);
         }
-
-        /// <summary>
-        /// Legacy endpoint for backward compatibility
-        /// </summary>
         [HttpGet("payment-callback-vnpay")]
         public async Task<IActionResult> PaymentCallbackVnpay()
         {
@@ -192,13 +141,6 @@ namespace MyApi.Controllers
             var response = await _vnPayService.PaymentExecuteAsync(Request.Query);
             return Ok(response);
         }
-
-        /// <summary>
-        /// Payment IPN (Instant Payment Notification) - Server to Server callback
-        /// POST/GET /api/payment/payment-ipn
-        /// VNPay gọi endpoint này để thông báo kết quả thanh toán (server-to-server)
-        /// Phải trả về JSON response theo format VNPay
-        /// </summary>
         [HttpGet("payment-ipn")]
         [HttpPost("payment-ipn")]
         public async Task<IActionResult> PaymentIPN()
@@ -215,7 +157,7 @@ namespace MyApi.Controllers
                     return Ok(new { RspCode = "99", Message = "Unknown error" });
                 }
 
-                // ✅ Trả về JSON response theo format VNPay yêu cầu
+                // Trả về JSON response theo format VNPay yêu cầu
                 if (response.Success && response.VnPayResponseCode == "00")
                 {
                     _logger.LogInformation($"PaymentIPN: Payment success - OrderId={response.OrderId}");

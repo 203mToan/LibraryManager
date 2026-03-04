@@ -18,7 +18,6 @@ namespace MyApi.Model.Response
 
         public LoanResponse ToResponse(Loan loan)
         {
-            // ✅ Chỉ lấy FineAmount từ database, không tính toán ở FE
             int fine = loan.FineAmount;
             
             return new LoanResponse

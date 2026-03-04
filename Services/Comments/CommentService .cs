@@ -16,8 +16,6 @@ namespace MyApi.Services.Comments
         {
             _db = db;
         }
-
-        // GET ALL (ADMIN) - PHÂN TRANG
         public async Task<CommentPagedResponse<CommentResponse>> GetAllAsync(int page, int pageSize)
         {
             var query = _db.Comments
@@ -51,8 +49,6 @@ namespace MyApi.Services.Comments
                 TotalPages = (int)Math.Ceiling((double)totalItems / pageSize)
             };
         }
-
-        // GET COMMENT BY BOOK
         public async Task<IEnumerable<CommentResponse>> GetByBookIdAsync(int bookId)
         {
             return await _db.Comments
@@ -71,8 +67,6 @@ namespace MyApi.Services.Comments
                 })
                 .ToListAsync();
         }
-
-        // CREATE
         public async Task<CommentResponse> CreateAsync(Guid userId, CommentCreateRequest request)
         {
             var comment = new Comment
@@ -98,8 +92,6 @@ namespace MyApi.Services.Comments
                 CreatedAt = comment.CreatedAt
             };
         }
-
-        // UPDATE (CHỈ CHỦ COMMENT)
         public async Task<bool> UpdateAsync(Guid id, Guid userId, CommentUpdateRequest request)
         {
             var comment = await _db.Comments
@@ -114,24 +106,18 @@ namespace MyApi.Services.Comments
             await _db.SaveChangesAsync();
             return true;
         }
-
-        // DELETE (CHỈ CHỦ COMMENT hoặc ADMIN)
         public async Task<bool> DeleteAsync(Guid id, Guid userId)
         {
             var comment = await _db.Comments
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (comment == null) return false;
-
-            // If the requester is the owner, allow delete
             if (comment.UserId == userId)
             {
                 _db.Comments.Remove(comment);
                 await _db.SaveChangesAsync();
                 return true;
             }
-
-            // Otherwise check if requester is admin
             var user = await _db.Users
                 .Include(u => u.Role)
                 .FirstOrDefaultAsync(u => u.Id == userId);

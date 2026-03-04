@@ -17,10 +17,6 @@ namespace MyApi.Services.VnPay
             _logger = logger;
             _paymentService = paymentService;
         }
-
-        /// <summary>
-        /// Create payment URL for redirect method (Traditional)
-        /// </summary>
         public string CreatePaymentUrl(PaymentInformationModel model, HttpContext context)
         {
             var timeZoneById = TimeZoneInfo.FindSystemTimeZoneById(_configuration["TimeZoneId"]);
@@ -47,10 +43,6 @@ namespace MyApi.Services.VnPay
 
             return paymentUrl;
         }
-
-        /// <summary>
-        /// Create payment URL using API method (Dev Environment)
-        /// </summary>
         public async Task<VnPayApiResponse> CreatePaymentUrlAsync(VnPayApiPaymentRequest request)
         {
             try
@@ -69,22 +61,15 @@ namespace MyApi.Services.VnPay
                 var timeZoneById = TimeZoneInfo.FindSystemTimeZoneById(_configuration["TimeZoneId"]);
                 var timeNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneById);
                 var expireDate = timeNow.AddMinutes(request.ExpireTime);
-
-                // ✅ Generate new OrderId if not provided or use DateTime.Ticks for uniqueness
                 var orderId = request.OrderId;
                 if (string.IsNullOrEmpty(orderId) || orderId == "string")
                 {
                     orderId = DateTime.Now.Ticks.ToString();
                 }
-
-                // ✅ Check if Payment already exists (created by FinePaymentController)
                 var existingPayment = await _paymentService.GetPaymentByOrderIdAsync(orderId);
                 if (existingPayment == null)
                 {
                     _logger.LogInformation($"CreatePaymentUrlAsync: No existing payment found, creating new payment record for OrderId={orderId}");
-                    // Note: This path is for backward compatibility when called directly without FinePaymentController
-                    // In this case, we don't have userId/loanId context, so we skip creating payment record
-                    // The payment will be tracked by VNPay's callback only
                 }
 
                 var pay = new VnPayLibrary();
@@ -104,8 +89,6 @@ namespace MyApi.Services.VnPay
                 pay.AddRequestData("vnp_ExpireDate", expireDate.ToString("yyyyMMddHHmmss"));
 
                 _logger.LogInformation($"VNPay ReturnUrl: {_configuration["Vnpay:PaymentBackReturnUrl"]}");
-
-                // Optional: Bank code
                 if (!string.IsNullOrEmpty(request.BankCode))
                 {
                     pay.AddRequestData("vnp_BankCode", request.BankCode);
@@ -138,10 +121,6 @@ namespace MyApi.Services.VnPay
                 };
             }
         }
-
-        /// <summary>
-        /// Verify payment from VnPay callback
-        /// </summary>
         public async Task<VnPayApiResponse> VerifyPaymentAsync(IQueryCollection collections)
         {
             try
@@ -161,8 +140,6 @@ namespace MyApi.Services.VnPay
                         Success = false
                     };
                 }
-
-                // Check response code from VnPay
                 var responseCode = collections.FirstOrDefault(k => k.Key == "vnp_ResponseCode").Value;
                 var transactionStatus = collections.FirstOrDefault(k => k.Key == "vnp_TransactionStatus").Value;
 
@@ -205,10 +182,6 @@ namespace MyApi.Services.VnPay
                 };
             }
         }
-
-        /// <summary>
-        /// Get payment status (Return URL callback)
-        /// </summary>
         public async Task<PaymentResponseModel> PaymentExecuteAsync(IQueryCollection collections)
         {
             try
@@ -223,8 +196,6 @@ namespace MyApi.Services.VnPay
                         OrderDescription = "Không có dữ liệu callback từ VnPay"
                     };
                 }
-
-                // Log all query parameters for debugging
                 _logger.LogInformation($"PaymentExecute: Received callback with {collections.Count} parameters");
                 foreach (var param in collections)
                 {
@@ -235,8 +206,6 @@ namespace MyApi.Services.VnPay
                 var response = pay.GetFullResponseData(collections, _configuration["Vnpay:HashSecret"]);
 
                 _logger.LogInformation($"PaymentExecute: Processing OrderId={response.OrderId}, Success={response.Success}, ResponseCode={response.VnPayResponseCode}");
-
-                // ✅ Update Payment status in database (async)
                 if (!string.IsNullOrEmpty(response.OrderId))
                 {
                     await UpdatePaymentStatus(response);
@@ -255,8 +224,6 @@ namespace MyApi.Services.VnPay
                 };
             }
         }
-
-        // ✅ Keep sync version for backward compatibility
         public PaymentResponseModel PaymentExecute(IQueryCollection collections)
         {
             try
@@ -271,8 +238,6 @@ namespace MyApi.Services.VnPay
                         OrderDescription = "Không có dữ liệu callback từ VnPay"
                     };
                 }
-
-                // Log all query parameters for debugging
                 _logger.LogInformation($"PaymentExecute: Received callback with {collections.Count} parameters");
                 foreach (var param in collections)
                 {
@@ -297,23 +262,19 @@ namespace MyApi.Services.VnPay
                 };
             }
         }
-
-        // ✅ Hàm helper để update payment status
         private async Task UpdatePaymentStatus(PaymentResponseModel response)
         {
             try
             {
-                // ✅ First check if payment exists
                 var existingPayment = await _paymentService.GetPaymentByOrderIdAsync(response.OrderId);
                 if (existingPayment == null)
                 {
                     _logger.LogWarning($"UpdatePaymentStatus: Payment not found OrderId={response.OrderId}. Skipping update (test mode or direct API call).");
-                    return; // Don't throw exception, just skip update
+                    return; 
                 }
 
                 if (response.Success && response.VnPayResponseCode == "00")
                 {
-                    // Thanh toán thành công
                     await _paymentService.UpdatePaymentSuccessAsync(
                         response.OrderId,
                         response.TransactionId ?? "",
@@ -323,7 +284,6 @@ namespace MyApi.Services.VnPay
                 }
                 else
                 {
-                    // Thanh toán thất bại
                     var errorMsg = $"VNPay Error Code: {response.VnPayResponseCode}";
                     await _paymentService.UpdatePaymentFailedAsync(response.OrderId, errorMsg);
                     _logger.LogWarning($"UpdatePaymentStatus: Payment Failed - OrderId={response.OrderId}, Error={errorMsg}");

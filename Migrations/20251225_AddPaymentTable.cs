@@ -47,7 +47,6 @@ namespace MyApi.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
-            // Create unique index on OrderId
             migrationBuilder.CreateIndex(
                 name: "IX_Payments_OrderId",
                 table: "Payments",

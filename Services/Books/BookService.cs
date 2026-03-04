@@ -16,10 +16,6 @@ namespace MyApi.Services.Books
         {
             _db = db ?? throw new ArgumentNullException(nameof(db));
         }
-
-        // =========================
-        // 1️⃣ HÀM CŨ – GIỮ NGUYÊN
-        // =========================
         public async Task<Book?> GetById(int id)
         {
             return await _db.Books
@@ -27,10 +23,6 @@ namespace MyApi.Services.Books
                 .Include(b => b.Category)
                 .FirstOrDefaultAsync(b => b.Id == id);
         }
-
-        // =========================
-        // 2️⃣ HÀM MỚI – CHO FE
-        // =========================
         public async Task<BookResponse?> GetByIdAsync(int id)
         {
             var book = await _db.Books
@@ -55,10 +47,6 @@ namespace MyApi.Services.Books
                 CategoryName = book.Category.Name
             };
         }
-
-        // =========================
-        // 3️⃣ CREATE
-        // =========================
         public async Task<BookCreateResponse?> CreateBookAsync(BookCreateRequest request)
         {
             if (request == null) return null;
@@ -85,10 +73,6 @@ namespace MyApi.Services.Books
                 Message = "Book created successfully"
             };
         }
-
-        // =========================
-        // 4️⃣ UPDATE
-        // =========================
         public async Task<BookUpdateResponse?> UpdateBookAsync(BookUpdateRequest request)
         {
             if (request == null) return null;
@@ -129,10 +113,6 @@ namespace MyApi.Services.Books
                 Message = "Book updated successfully"
             };
         }
-
-        // =========================
-        // 5️⃣ DELETE
-        // =========================
         public async Task<bool> DeleteBookAsync(int id)
         {
             var book = await _db.Books.FirstOrDefaultAsync(b => b.Id == id);
@@ -142,10 +122,6 @@ namespace MyApi.Services.Books
             await _db.SaveChangesAsync();
             return true;
         }
-
-        // =========================
-        // 6️⃣ GET ALL – PAGINATION
-        // =========================
         public async Task<PagedBookResponse> GetAllBooksAsync(int page, int pageSize, int? categoryId)
         {
             if (page <= 0) page = 1;

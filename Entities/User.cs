@@ -12,8 +12,6 @@
         public string? NationalId { get; set; } = null!;
         public string? PasswordHash { get; set; }
         public int? RoleId { get; set; }
-
-        // Navigation
         public Role Role { get; set; }
         public ICollection<Loan> Loans { get; set; }
         public ICollection<Notification> Notifications { get; set; }

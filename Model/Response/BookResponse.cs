@@ -14,8 +14,6 @@
         public string? Publisher { get; set; }
         public int? YearPublished { get; set; }
         public int StockQuantity { get; set; } = 0;
-
-        // ⭐ ADD – PHỤC VỤ FE HIỂN THỊ
         public string? AuthorName { get; set; }
         public string? CategoryName { get; set; }
     }

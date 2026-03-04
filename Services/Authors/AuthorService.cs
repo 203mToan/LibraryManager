@@ -90,8 +90,6 @@ namespace MyApi.Services.Authors
             await _db.SaveChangesAsync();
             return true;
         }
-
-        // ⭐ PAGINATION CHUẨN – KHÔNG TRẢ ALL DATA
         public async Task<AuthorPagedResponse> GetAllAuthorsAsync(int page, int pageSize)
         {
             if (page <= 0) page = 1;
@@ -131,14 +129,10 @@ namespace MyApi.Services.Authors
 
             var email = request.Email.Trim();
             var username = request.UserName.Trim();
-
-            // Validate tối thiểu
             if (string.IsNullOrWhiteSpace(email) ||
                 string.IsNullOrWhiteSpace(username) ||
                 string.IsNullOrWhiteSpace(request.Password))
                 return null;
-
-            // Check trùng Email / UserName
             var exists = await _db.Users.AnyAsync(u =>
                 u.Email.ToLower() == email.ToLower()
                 || u.UserName.ToLower() == username.ToLower()
@@ -159,7 +153,7 @@ namespace MyApi.Services.Authors
                 Gender = request.Gender,
                 NationalId = request.NationalId.Trim(),
                 CreatedAt = DateTime.UtcNow,
-                RoleId = 2 // Assuming '2' is the default role ID for regular users
+                RoleId = 2 
             };
 
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password); 

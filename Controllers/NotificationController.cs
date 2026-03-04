@@ -15,10 +15,6 @@ namespace MyApi.Controllers
         {
             _notificationService = notificationService;
         }
-
-        /// <summary>
-        /// L?y danh sách thông báo c?a user hi?n t?i
-        /// </summary>
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetNotifications()
@@ -34,10 +30,6 @@ namespace MyApi.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
-
-        /// <summary>
-        /// L?y danh sách thông báo ch?a ??c + s? l??ng
-        /// </summary>
         [Authorize]
         [HttpGet("unread")]
         public async Task<IActionResult> GetUnreadNotifications()
@@ -57,10 +49,6 @@ namespace MyApi.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
-
-        /// <summary>
-        /// ?ánh d?u thông báo là ?ã ??c
-        /// </summary>
         [Authorize]
         [HttpPut("read/{id}")]
         public async Task<IActionResult> MarkAsRead(int id)
@@ -77,10 +65,6 @@ namespace MyApi.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
-
-        /// <summary>
-        /// ?ánh d?u t?t c? thông báo là ?ã ??c
-        /// </summary>
         [Authorize]
         [HttpPut("read-all")]
         public async Task<IActionResult> MarkAllAsRead()
@@ -96,10 +80,6 @@ namespace MyApi.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
-
-        /// <summary>
-        /// Xóa thông báo
-        /// </summary>
         [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteNotification(int id)

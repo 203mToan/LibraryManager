@@ -15,10 +15,6 @@ namespace MyApi.Controllers
         {
             _loanService = loanService;
         }
-
-        /// <summary>
-        /// Tạo yêu cầu mượn sách mới
-        /// </summary>
         [Authorize("AdminOrUser")]
         [HttpPost]
         public async Task<IActionResult> CreateLoan([FromBody] LoanRequest request)
@@ -33,13 +29,6 @@ namespace MyApi.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
-
-        /// <summary>
-        /// Lấy danh sách tất cả các khoản mượn với phân trang (Admin only)
-        /// </summary>
-        /// <param name="pageIndex">Trang hiện tại (bắt đầu từ 1)</param>
-        /// <param name="pageSize">Số items mỗi trang</param>
-        /// <param name="status">Filter theo status: Pending, Approved, Overdue, Paid, Returned, Cancelled</param>
         [Authorize("AdminOnly")]
         [HttpGet]
         public async Task<IActionResult> GetAllLoans(
@@ -50,10 +39,6 @@ namespace MyApi.Controllers
             var result = await _loanService.GetAllLoansPagedAsync(pageIndex, pageSize, status);
             return Ok(result);
         }
-
-        /// <summary>
-        /// Lấy thông tin chi tiết một khoản mượn
-        /// </summary>
         [Authorize("AdminOrUser")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetLoanById(int id)
@@ -65,10 +50,6 @@ namespace MyApi.Controllers
 
             return Ok(result);
         }
-
-        /// <summary>
-        /// Trả sách
-        /// </summary>
         [Authorize("AdminOrUser")]
         [HttpPut("return/{id}")]
         public async Task<IActionResult> ReturnBook(int id, [FromBody] DateTime returnDate)
@@ -87,13 +68,6 @@ namespace MyApi.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
-
-        /// <summary>
-        /// Lấy danh sách các khoản mượn của người dùng hiện tại với phân trang
-        /// </summary>
-        /// <param name="pageIndex">Trang hiện tại (bắt đầu từ 1)</param>
-        /// <param name="pageSize">Số items mỗi trang</param>
-        /// <param name="status">Filter theo status: Pending, Approved, Overdue, Paid, Returned, Cancelled</param>
         [Authorize("AdminOrUser")]
         [HttpGet("my")]
         public async Task<IActionResult> GetMyLoans(
@@ -111,10 +85,6 @@ namespace MyApi.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
-
-        /// <summary>
-        /// Phê duyệt yêu cầu mượn sách (Admin only)
-        /// </summary>
         [Authorize("AdminOnly")]
         [HttpPut("approve/{id}")]
         public async Task<IActionResult> ApproveLoan(int id)
@@ -133,10 +103,6 @@ namespace MyApi.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
-       
-        /// <summary>
-        /// Hủy yêu cầu mượn sách
-        /// </summary>
         [Authorize("AdminOrUser")]
         [HttpPut("cancel/{id}")]
         public async Task<IActionResult> CancelLoan(int id)
@@ -155,10 +121,6 @@ namespace MyApi.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
-
-        /// <summary>
-        /// User thanh toán tiền phạt - chờ admin duyệt
-        /// </summary>
         [Authorize("AdminOrUser")]
         [HttpPut("send-request-pay-fine/{id}")]
         public async Task<IActionResult> PayFine(int id)
@@ -183,10 +145,6 @@ namespace MyApi.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }   
-
-        /// <summary>
-        /// Admin duyệt trả sách (sau khi user đã thanh toán)
-        /// </summary>
         [Authorize("AdminOnly")]
         [HttpPut("approve-payment/{id}")]
         public async Task<IActionResult> ApprovePayment(int id)
@@ -210,10 +168,6 @@ namespace MyApi.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
-
-        /// <summary>
-        /// Lấy tóm tắt thống kê mượn sách theo tháng/năm
-        /// </summary>
         [Authorize("AdminOnly")]
         [HttpGet("summary/by-period")]
         public async Task<IActionResult> GetLoanSummaryByPeriod([FromQuery] int year, [FromQuery] int? month = null)

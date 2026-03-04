@@ -16,10 +16,10 @@
 
     public enum NotificationType
     {
-        LoanApproved,      // Khi admin duyệt mượn sách
-        PaymentApproved,   // Khi admin duyệt thanh toán tiền phạt
-        PaymentSuccess,    // Khi thanh toán VNPay thành công - có thể tiếp tục mượn sách
-        LoanOverdue,       // Khi sách quá hạn
-        PaymentRequested   // Khi có yêu cầu thanh toán
+        LoanApproved,      
+        PaymentApproved,   
+        PaymentSuccess,    
+        LoanOverdue,       
+        PaymentRequested   
     }
 }

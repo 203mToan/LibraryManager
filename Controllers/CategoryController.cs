@@ -16,8 +16,6 @@ namespace MyApi.Controllers
         {
             _categoryService = categoryService;
         }
-
-        // GET: api/category?page=1&pageSize=10
         [Authorize("AdminOrUser")]
         [HttpGet]
         public async Task<IActionResult> GetAllCategories(
@@ -28,8 +26,6 @@ namespace MyApi.Controllers
             var result = await _categoryService.GetAllCategoriesAsync(page, pageSize);
             return Ok(result);
         }
-
-        // POST: api/category
         [Authorize("AdminOnly")]
         [HttpPost]
         public async Task<IActionResult> CreateCategory(
@@ -43,8 +39,6 @@ namespace MyApi.Controllers
 
             return Ok(result);
         }
-
-        // PUT: api/category
         [Authorize("AdminOnly")]
         [HttpPut]
         public async Task<IActionResult> UpdateCategory(
@@ -58,8 +52,6 @@ namespace MyApi.Controllers
 
             return Ok(result);
         }
-
-        // DELETE: api/category/{id}
         [Authorize("AdminOnly")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategory(int id)

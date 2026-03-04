@@ -16,7 +16,6 @@ namespace MyApi.Services.Reports
 
         public async Task<LoanTrendResponse> GetLoanTrendAsync(string period, int year, int? month = null, int? week = null)
         {
-            // ? Load t?t c? loans vào memory tr??c, sau ?ó x? lý datetime
             var loans = await _db.Loans
                 .Where(x => x.LoanDate.HasValue)
                 .ToListAsync();
@@ -30,8 +29,6 @@ namespace MyApi.Services.Reports
                 {
                     var date = startDate.AddDays(day);
                     var label = $"Tu?n {date.Day}";
-
-                    // ? Filter trong memory, không trong query
                     var loanCount = loans.Count(x => x.LoanDate.Value.ToUniversalTime().Date == date.Date);
                     var returnCount = loans.Count(x => x.ReturnDate.HasValue && x.ReturnDate.Value.ToUniversalTime().Date == date.Date);
 
@@ -54,8 +51,6 @@ namespace MyApi.Services.Reports
                     var weekEnd = weekStart.AddDays(6);
 
                     if (weekStart.Month != month.Value) break;
-
-                    // ? Filter trong memory
                     var loanCount = loans.Count(x => x.LoanDate.HasValue &&
                         x.LoanDate.Value.ToUniversalTime().Date >= weekStart.Date &&
                         x.LoanDate.Value.ToUniversalTime().Date <= weekEnd.Date);
@@ -77,8 +72,6 @@ namespace MyApi.Services.Reports
                 {
                     var startDate = new DateTime(year, m, 1, 0, 0, 0, DateTimeKind.Utc);
                     var endDate = startDate.AddMonths(1).AddDays(-1);
-
-                    // ? Filter trong memory
                     var loanCount = loans.Count(x => x.LoanDate.HasValue &&
                         x.LoanDate.Value.ToUniversalTime().Date >= startDate.Date &&
                         x.LoanDate.Value.ToUniversalTime().Date <= endDate.Date);
@@ -106,14 +99,10 @@ namespace MyApi.Services.Reports
         {
             var startDate = new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Utc);
             var endDate = startDate.AddMonths(1).AddDays(-1);
-
-            // ? Load t?t c? loans vào memory tr??c
             var loans = await _db.Loans
                 .Include(x => x.Book)
                 .ThenInclude(x => x.Category)
                 .ToListAsync();
-
-            // ? Filter trong memory
             var filteredLoans = loans
                 .Where(x => x.LoanDate.HasValue &&
                            x.LoanDate.Value.ToUniversalTime().Date >= startDate.Date &&
@@ -164,13 +153,9 @@ namespace MyApi.Services.Reports
                 startDate = DateTime.UtcNow.Date;
                 endDate = startDate;
             }
-
-            // ? Load t?t c? loans vào memory
             var loans = await _db.Loans
                 .Include(x => x.User)
                 .ToListAsync();
-
-            // ? Filter trong memory
             var filteredLoans = loans
                 .Where(x => x.LoanDate.HasValue &&
                            x.LoanDate.Value.ToUniversalTime().Date >= startDate.Date &&
@@ -216,14 +201,10 @@ namespace MyApi.Services.Reports
                 startDate = DateTime.UtcNow.Date;
                 endDate = startDate;
             }
-
-            // ? Load t?t c? loans vào memory
             var loans = await _db.Loans
                 .Include(x => x.Book)
                 .ThenInclude(x => x.Category)
                 .ToListAsync();
-
-            // ? Filter trong memory
             var filteredLoans = loans
                 .Where(x => x.LoanDate.HasValue &&
                            x.LoanDate.Value.ToUniversalTime().Date >= startDate.Date &&

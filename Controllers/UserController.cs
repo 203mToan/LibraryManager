@@ -17,22 +17,12 @@ namespace MyApi.Controllers
         {
             _userService = userService;
         }
-
-        // =========================
-        // GET ALL USERS (ADMIN)
-        // =========================
-        //[Authorize("AdminOnly")]
         [HttpGet]
         public async Task<IActionResult> GetAllUser(int? pageIndex, int? pageSize)
         {
             var result = await _userService.GetAllUsersAsync(pageIndex, pageSize);
             return Ok(result);
         }
-
-        // =========================
-        // GET CURRENT USER PROFILE
-        // GET: api/user/me
-        // =========================
         [HttpGet("me")]
         public async Task<IActionResult> GetMyProfile()
         {
@@ -48,11 +38,6 @@ namespace MyApi.Controllers
 
             return Ok(user);
         }
-
-        // =========================
-        // UPDATE CURRENT USER PROFILE
-        // PUT: api/user/me
-        // =========================
         [HttpPut("me")]
         public async Task<IActionResult> UpdateMyProfile([FromBody] UpdateUserRequest request)
         {
@@ -68,11 +53,6 @@ namespace MyApi.Controllers
 
             return Ok(updatedUser);
         }
-
-        // =========================
-        // CHANGE PASSWORD
-        // PUT: api/user/change-password
-        // =========================
         [HttpPut("change-password")]
         public async Task<IActionResult> ChangePasswordUser(Guid userId, string newPassword)
         {
@@ -82,15 +62,6 @@ namespace MyApi.Controllers
 
             return Ok("Password changed successfully");
         }
-
-        // =========================
-        // CHECK DUPLICATE FIELDS
-        // =========================
-
-        /// <summary>
-        /// Kiểm tra username đã tồn tại chưa
-        /// GET: api/user/check-username/{username}
-        /// </summary>
         [AllowAnonymous]
         [HttpGet("check-username/{username}")]
         public async Task<IActionResult> CheckUsername(string username)
@@ -107,11 +78,6 @@ namespace MyApi.Controllers
                 message = exists ? "Username đã được sử dụng" : "Username có thể sử dụng"
             });
         }
-
-        /// <summary>
-        /// Kiểm tra email đã tồn tại chưa
-        /// GET: api/user/check-email/{email}
-        /// </summary>
         [AllowAnonymous]
         [HttpGet("check-email/{email}")]
         public async Task<IActionResult> CheckEmail(string email)
@@ -128,11 +94,6 @@ namespace MyApi.Controllers
                 message = exists ? "Email đã được sử dụng" : "Email có thể sử dụng"
             });
         }
-
-        /// <summary>
-        /// Kiểm tra số điện thoại đã tồn tại chưa
-        /// GET: api/user/check-phone/{phone}
-        /// </summary>
         [AllowAnonymous]
         [HttpGet("check-phone/{phone}")]
         public async Task<IActionResult> CheckPhone(string phone)
@@ -149,11 +110,6 @@ namespace MyApi.Controllers
                 message = exists ? "Số điện thoại đã được sử dụng" : "Số điện thoại có thể sử dụng"
             });
         }
-
-        /// <summary>
-        /// Kiểm tra CCCD/CMND đã tồn tại chưa
-        /// GET: api/user/check-nationalid/{nationalId}
-        /// </summary>
         [AllowAnonymous]
         [HttpGet("check-nationalid/{nationalId}")]
         public async Task<IActionResult> CheckNationalId(string nationalId)

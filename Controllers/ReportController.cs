@@ -14,10 +14,6 @@ namespace MyApi.Controllers
         {
             _reportService = reportService;
         }
-
-        /// <summary>
-        /// Xu h??ng m??n sách theo period (week/month/year)
-        /// </summary>
         [Authorize("AdminOnly")]
         [HttpGet("loan-trend")]
         public async Task<IActionResult> GetLoanTrend(
@@ -39,10 +35,6 @@ namespace MyApi.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
-
-        /// <summary>
-        /// Phân b? sách theo th? lo?i
-        /// </summary>
         [Authorize("AdminOnly")]
         [HttpGet("category-distribution")]
         public async Task<IActionResult> GetCategoryDistribution(
@@ -62,10 +54,6 @@ namespace MyApi.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
-
-        /// <summary>
-        /// Top 5 ng??i dùng tích c?c
-        /// </summary>
         [Authorize("AdminOnly")]
         [HttpGet("top-users")]
         public async Task<IActionResult> GetTopUsers(
@@ -86,10 +74,6 @@ namespace MyApi.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
-
-        /// <summary>
-        /// Top 5 sách hot
-        /// </summary>
         [Authorize("AdminOnly")]
         [HttpGet("top-books")]
         public async Task<IActionResult> GetTopBooks(

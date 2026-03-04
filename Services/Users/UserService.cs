@@ -100,11 +100,6 @@ namespace MyApi.Services.Users
 
             return new PagedUserResponse(userResponses, totalItems, pageSize);
         }
-
-        // =======================
-        // ✅ NEW FEATURES
-        // =======================
-
         public async Task<UserResponse?> GetUserByIdAsync(Guid userId)
         {
             var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
@@ -139,11 +134,6 @@ namespace MyApi.Services.Users
 
             return await GetUserByIdAsync(userId);
         }
-
-        // =======================
-        // ✅ CHECK DUPLICATE FIELDS
-        // =======================
-
         public async Task<bool> IsUsernameExistsAsync(string username, Guid? excludeUserId = null)
         {
             if (string.IsNullOrWhiteSpace(username))

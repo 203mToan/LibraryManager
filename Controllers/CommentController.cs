@@ -18,8 +18,6 @@ namespace MyApi.Controllers
         {
             _commentService = commentService;
         }
-
-        // ✅ ADMIN – GET ALL COMMENT (PHÂN TRANG)
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAll(int page = 1, int pageSize = 10)
@@ -27,16 +25,12 @@ namespace MyApi.Controllers
             var comments = await _commentService.GetAllAsync(page, pageSize);
             return Ok(comments);
         }
-
-        // PUBLIC – GET COMMENT BY BOOK
         [HttpGet("book/{bookId}")]
         public async Task<IActionResult> GetByBook(int bookId)
         {
             var comments = await _commentService.GetByBookIdAsync(bookId);
             return Ok(comments);
         }
-
-        // USER – CREATE COMMENT
         [Authorize]
         [HttpPost]
         public async Task<IActionResult> Create(CommentCreateRequest request)
@@ -45,8 +39,6 @@ namespace MyApi.Controllers
             var result = await _commentService.CreateAsync(userId, request);
             return Ok(result);
         }
-
-        // USER – UPDATE COMMENT
         [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, CommentUpdateRequest request)
@@ -55,8 +47,6 @@ namespace MyApi.Controllers
             var success = await _commentService.UpdateAsync(id, userId, request);
             return success ? Ok() : Forbid();
         }
-
-        // USER – DELETE COMMENT
         [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)

@@ -18,8 +18,6 @@ namespace MyApi.Controllers
         {
             _authorService = authorService;
         }
-
-        // GET: api/author?page=1&pageSize=10
         [Authorize("AdminOrUser")]
         [HttpGet]
         public async Task<IActionResult> GetAllAuthors(
@@ -30,8 +28,6 @@ namespace MyApi.Controllers
             var result = await _authorService.GetAllAuthorsAsync(page, pageSize);
             return Ok(result);
         }
-
-        // GET: api/author/{id}
         [Authorize("AdminOrUser")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
@@ -50,8 +46,6 @@ namespace MyApi.Controllers
                 BookCount = author.Books?.Count ?? 0
             });
         }
-
-        // POST: api/author
         [Authorize("AdminOnly")]
         [HttpPost]
         public async Task<IActionResult> CreateAuthor([FromBody] AuthorCreateRequest model)
@@ -62,8 +56,6 @@ namespace MyApi.Controllers
 
             return Ok(result);
         }
-
-        // PUT: api/author
         [Authorize("AdminOnly")]
         [HttpPut]
         public async Task<IActionResult> UpdateAuthor([FromBody] AuthorUpdateRequest model)
@@ -74,8 +66,6 @@ namespace MyApi.Controllers
 
             return Ok(result);
         }
-
-        // DELETE: api/author/{id}
         [Authorize("AdminOnly")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAuthor(Guid id)

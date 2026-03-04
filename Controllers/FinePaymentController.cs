@@ -31,14 +31,6 @@ namespace MyApi.Controllers
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
         }
-
-        // ============================================
-        // ADMIN ENDPOINTS (Existing)
-        // ============================================
-
-        /// <summary>
-        /// L?y t?t c? các kho?n thanh toán ph?t
-        /// </summary>
         [Authorize("AdminOnly")]
         [HttpGet]
         public async Task<IActionResult> GetAllFinePayments()
@@ -53,10 +45,6 @@ namespace MyApi.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
-
-        /// <summary>
-        /// L?y báo cáo thanh toán ph?t theo kho?ng ngày
-        /// </summary>
         [Authorize("AdminOnly")]
         [HttpGet("by-date")]
         public async Task<IActionResult> GetFinePaymentsByDate([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
@@ -71,10 +59,6 @@ namespace MyApi.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
-
-        /// <summary>
-        /// L?y báo cáo thanh toán ph?t theo tu?n
-        /// </summary>
         [Authorize("AdminOnly")]
         [HttpGet("by-week")]
         public async Task<IActionResult> GetFinePaymentsByWeek([FromQuery] int week, [FromQuery] int year)
@@ -92,10 +76,6 @@ namespace MyApi.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
-
-        /// <summary>
-        /// L?y báo cáo thanh toán ph?t theo tháng
-        /// </summary>
         [Authorize("AdminOnly")]
         [HttpGet("by-month")]
         public async Task<IActionResult> GetFinePaymentsByMonth([FromQuery] int month, [FromQuery] int year)
@@ -113,10 +93,6 @@ namespace MyApi.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
-
-        /// <summary>
-        /// L?y báo cáo thanh toán ph?t theo n?m
-        /// </summary>
         [Authorize("AdminOnly")]
         [HttpGet("by-year")]
         public async Task<IActionResult> GetFinePaymentsByYear([FromQuery] int year)
@@ -131,10 +107,6 @@ namespace MyApi.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
-
-        /// <summary>
-        /// L?y th?ng kê t?ng doanh thu ph?t (ngày, tu?n, tháng, n?m)
-        /// </summary>
         [Authorize("AdminOnly")]
         [HttpGet("statistics")]
         public async Task<IActionResult> GetFinePaymentStatistics()
@@ -149,15 +121,6 @@ namespace MyApi.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
-
-        // ============================================
-        // USER ENDPOINTS (NEW - VNPay Payment)
-        // ============================================
-
-        /// <summary>
-        /// Check Fine Amount c?a Loan
-        /// GET /api/finepayment/check-fine/{loanId}
-        /// </summary>
         [Authorize]
         [HttpGet("check-fine/{loanId}")]
         public async Task<IActionResult> CheckFineAmount(int loanId)
@@ -188,11 +151,6 @@ namespace MyApi.Controllers
                 });
             }
         }
-
-        /// <summary>
-        /// Kh?i t?o Payment cho Ti?n Ph?t VNPay
-        /// POST /api/finepayment/initiate-vnpay-payment
-        /// </summary>
         [Authorize]
         [HttpPost("initiate-vnpay-payment")]
         public async Task<IActionResult> InitiateVNPayPayment([FromBody] InitiateFinePaymentRequest request)
@@ -204,8 +162,6 @@ namespace MyApi.Controllers
                 {
                     return Unauthorized(new { success = false, message = "User not found" });
                 }
-
-                // 1. ? Validate Loan và Fine Amount
                 var (isValid, validationMessage) = await _paymentService.ValidatePaymentAmountAsync(
                     request.LoanId,
                     request.Amount
@@ -220,8 +176,6 @@ namespace MyApi.Controllers
                         message = validationMessage
                     });
                 }
-
-                // 2. ? T?o Payment record
                 var payment = await _paymentService.CreatePaymentAsync(
                     userId: userGuid,
                     loanId: request.LoanId,
@@ -229,8 +183,6 @@ namespace MyApi.Controllers
                     orderInfo: $"Thanh toán ti?n ph?t - M??n sách #{request.LoanId}",
                     expiredAt: DateTime.UtcNow.AddMinutes(15)
                 );
-
-                // 3. ? T?o VNPay URL
                 var vnPayRequest = new VnPayApiPaymentRequest
                 {
                     OrderId = payment.OrderId,
@@ -284,11 +236,6 @@ namespace MyApi.Controllers
                 });
             }
         }
-
-        /// <summary>
-        /// Get Payment Status
-        /// GET /api/finepayment/payment-status/{orderId}
-        /// </summary>
         [Authorize]
         [HttpGet("payment-status/{orderId}")]
         public async Task<IActionResult> GetPaymentStatus(string orderId)
@@ -332,11 +279,6 @@ namespace MyApi.Controllers
                 });
             }
         }
-
-        /// <summary>
-        /// Get User Fine Payments History
-        /// GET /api/finepayment/my-payments
-        /// </summary>
         [Authorize]
         [HttpGet("my-payments")]
         public async Task<IActionResult> GetMyPayments()

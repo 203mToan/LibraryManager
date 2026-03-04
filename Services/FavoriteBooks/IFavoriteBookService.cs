@@ -9,8 +9,6 @@ namespace MyApi.Services.FavoriteBooks
         Task<bool> AddAsync(Guid userId, int bookId);
         Task<bool> RemoveAsync(Guid userId, int bookId);
         Task<bool> IsFavoritedAsync(Guid userId, int bookId);
-
-        // ⭐ CHỈ ĐỔI TÊN RESPONSE
         Task<FavoritePagedResponse<FavoriteBookResponse>> GetMyFavoritesAsync(
             Guid userId,
             int page,

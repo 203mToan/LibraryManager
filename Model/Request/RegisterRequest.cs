@@ -12,8 +12,6 @@
         public string? Gender { get; set; }
 
         public string NationalId { get; set; } = null!;
-
-        // User sẽ nhập Password → backend sẽ Hash
         public string Password { get; set; } = null!;
     }
 }

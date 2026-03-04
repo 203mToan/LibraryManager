@@ -9,9 +9,7 @@
         public DateTime? DueDate { get; set; }
         public DateTime? ReturnDate { get; set; }
 
-        public string? Status { get; set; }  // Pending / Approved / Returned / Overdue
-
-        // Navigation
+        public string? Status { get; set; }  
         public User User { get; set; } = null!;
         public Book Book { get; set; } = null!;
         public ICollection<FinePayment> FinePayments { get; set; } = new List<FinePayment>();

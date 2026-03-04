@@ -7,19 +7,10 @@ namespace MyApi.Services.Books
 {
     public interface IBookService
     {
-        // Get book by Id
         Task<Book?> GetById(int id);
-
-        // Create book
         Task<BookCreateResponse?> CreateBookAsync(BookCreateRequest request);
-
-        // Update book
         Task<BookUpdateResponse?> UpdateBookAsync(BookUpdateRequest request);
-
-        // Delete book
         Task<bool> DeleteBookAsync(int id);
-
-        // ⭐ PAGINATION CHUẨN
         Task<PagedBookResponse> GetAllBooksAsync(int page, int pageSize, int? CatergoryId);
         Task<BookResponse?> GetByIdAsync(int id);
 

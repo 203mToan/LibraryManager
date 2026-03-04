@@ -87,8 +87,6 @@ namespace MyApi.Services.Payments
                 payment.TransactionId = transactionId;
                 payment.VnPayResponseCode = vnPayResponseCode;
                 payment.PaidAt = DateTime.UtcNow;
-
-                // Update Loan status if linked
                 if (payment.LoanId.HasValue)
                 {
                     var loan = await _context.Loans
@@ -99,15 +97,10 @@ namespace MyApi.Services.Payments
                     if (loan != null)
                     {
                         var fineAmountBeforeUpdate = loan.FineAmount;
-                        
-                        // ? C?p nh?t Loan status thành "Paid" - ch? Admin duy?t tr? sách
                         loan.Status = LoanStatus.Paid.ToString();
                         loan.FineAmount = 0; // Reset ti?n ph?t v? 0
-                        // KHÔNG set ReturnDate ? ?ây - ch? Admin duy?t
                         loan.UpdatedAt = DateTime.UtcNow;
                         _context.Loans.Update(loan);
-
-                        // ? T?o record trong FinePayments table
                         if (fineAmountBeforeUpdate > 0)
                         {
                             var finePayment = new FinePayment
@@ -123,8 +116,6 @@ namespace MyApi.Services.Payments
                             };
                             _context.FinePayments.Add(finePayment);
                         }
-
-                        // ? T?o Notification thông báo thanh toán thành công
                         var bookTitle = loan.Book?.Title ?? "sách";
                         var notification = new Notification
                         {
@@ -265,8 +256,6 @@ namespace MyApi.Services.Payments
                 return false;
             }
         }
-
-        // ? Hàm m?i: Validate và l?y FineAmount t? Loan
         public async Task<decimal> GetLoanFineAmountAsync(int loanId)
         {
             try
@@ -287,8 +276,6 @@ namespace MyApi.Services.Payments
                 return 0;
             }
         }
-
-        // ? Hàm m?i: Check n?u Loan có ti?n ph?t ch?a thanh toán
         public async Task<bool> HasUnpaidFineAsync(int loanId)
         {
             try
@@ -302,8 +289,6 @@ namespace MyApi.Services.Payments
                 return false;
             }
         }
-
-        // ? Hàm m?i: Validate Payment Amount vs Loan FineAmount
         public async Task<(bool IsValid, string Message)> ValidatePaymentAmountAsync(int loanId, decimal paymentAmount)
         {
             try

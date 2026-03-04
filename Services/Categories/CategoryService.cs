@@ -84,8 +84,6 @@ namespace MyApi.Services.Categories
             await _db.SaveChangesAsync();
             return true;
         }
-
-        // ⭐ PAGINATION CHUẨN – KHÔNG TRẢ ALL DATA
         public async Task<CategoryPagedResponse> GetAllCategoriesAsync(int page, int pageSize)
         {
             if (page <= 0) page = 1;

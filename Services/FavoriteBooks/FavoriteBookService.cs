@@ -15,8 +15,6 @@ namespace MyApi.Services.FavoriteBooks
         {
             _db = db;
         }
-
-        // ➕ ADD FAVORITE
         public async Task<bool> AddAsync(Guid userId, int bookId)
         {
             var exists = await _db.FavoriteBooks
@@ -35,8 +33,6 @@ namespace MyApi.Services.FavoriteBooks
             await _db.SaveChangesAsync();
             return true;
         }
-
-        // ❌ REMOVE FAVORITE
         public async Task<bool> RemoveAsync(Guid userId, int bookId)
         {
             var favorite = await _db.FavoriteBooks
@@ -48,8 +44,6 @@ namespace MyApi.Services.FavoriteBooks
             await _db.SaveChangesAsync();
             return true;
         }
-
-        // ⭐ GET FAVORITES – PAGINATION + FULL BOOK JOIN
         public async Task<FavoritePagedResponse<FavoriteBookResponse>> GetMyFavoritesAsync(
             Guid userId,
             int page,
@@ -83,7 +77,6 @@ namespace MyApi.Services.FavoriteBooks
                     YearPublished = f.Book.YearPublished,
                     StockQuantity = f.Book.StockQuantity,
                     Publisher = f.Book.Publisher,
-                    // This book is in the current user's favorites
                     IsFavorited = true
                 })
                 .ToListAsync();
@@ -96,8 +89,6 @@ namespace MyApi.Services.FavoriteBooks
                 TotalPages = (int)Math.Ceiling((double)totalItems / pageSize)
             };
         }
-
-        // ✅ CHECK IF A BOOK IS FAVORITED
         public async Task<bool> IsFavoritedAsync(Guid userId, int bookId)
         {
             return await _db.FavoriteBooks

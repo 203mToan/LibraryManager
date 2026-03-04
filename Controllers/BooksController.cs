@@ -45,8 +45,6 @@ namespace MyApi.Controllers
 
             return Ok(result);
         }
-
-        // PUT: api/book
         [Authorize("AdminOnly")]
         [HttpPut]
         public async Task<IActionResult> UpdateBook(
@@ -60,8 +58,6 @@ namespace MyApi.Controllers
 
             return Ok(result);
         }
-
-        // DELETE: api/book/{id}
         [Authorize("AdminOnly")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBook(int id)

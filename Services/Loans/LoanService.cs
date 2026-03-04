@@ -24,8 +24,6 @@ namespace MyApi.Services.Loans
             var user = await _db.Users.FirstOrDefaultAsync(x => x.Id == request.UserId);
             if (user == null)
                 throw new Exception("User not found");
-
-            // Load user's loans into memory and check overdue in-memory to avoid PostgreSQL timestamptz vs timestamp translation issues
             var userLoans = await _db.Loans
                 .Where(x => x.UserId == request.UserId)
                 .ToListAsync();
@@ -71,29 +69,20 @@ namespace MyApi.Services.Loans
 
         public async Task<PagedHttpResponse<LoanResponse>> GetAllLoansPagedAsync(int? pageIndex, int? pageSize, string? status = null)
         {
-            // Query base
             var query = _db.Loans
                 .Include(x => x.User)
                 .Include(x => x.Book)
                 .AsQueryable();
-
-            // Filter theo status nếu có
             if (!string.IsNullOrWhiteSpace(status))
             {
                 query = query.Where(x => x.Status == status);
             }
-
-            // Đếm tổng số items
             var totalItems = await query.CountAsync();
-
-            // Lấy tất cả để update overdue status
             var allLoans = await query
                 .OrderByDescending(x => x.LoanDate)
                 .ToListAsync();
             
             await UpdateOverdueStatusAsync(allLoans);
-
-            // Áp dụng phân trang
             IEnumerable<Loan> pagedLoans = allLoans;
             if (pageIndex.HasValue && pageSize.HasValue && pageIndex > 0 && pageSize > 0)
             {
@@ -140,8 +129,6 @@ namespace MyApi.Services.Loans
                 throw new Exception("Book already returned");
 
             loan.ReturnDate = returnDate;
-            
-            // Kiểm tra nếu trả muộn
             if (loan.DueDate.HasValue && returnDate > loan.DueDate.Value)
             {
                 // ✅ Tính tiền phạt: số ngày trễ × 20000đ
@@ -156,8 +143,6 @@ namespace MyApi.Services.Loans
             }
             
             loan.UpdatedAt = DateTime.UtcNow;
-
-            // Increase back the book quantity
             loan.Book.StockQuantity += 1;
 
             await _db.SaveChangesAsync();
@@ -188,31 +173,21 @@ namespace MyApi.Services.Loans
 
             if (userId == null)
                 throw new Exception("Unauthorized");
-
-            // Query base
             var query = _db.Loans
                 .Where(x => x.UserId == userId.Value)
                 .Include(x => x.Book)
                 .Include(x => x.User)
                 .AsQueryable();
-
-            // Filter theo status nếu có
             if (!string.IsNullOrWhiteSpace(status))
             {
                 query = query.Where(x => x.Status == status);
             }
-
-            // Đếm tổng số items
             var totalItems = await query.CountAsync();
-
-            // Lấy tất cả để update overdue status
             var allLoans = await query
                 .OrderByDescending(x => x.LoanDate)
                 .ToListAsync();
             
             await UpdateOverdueStatusAsync(allLoans);
-
-            // Áp dụng phân trang
             IEnumerable<Loan> pagedLoans = allLoans;
             if (pageIndex.HasValue && pageSize.HasValue && pageIndex > 0 && pageSize > 0)
             {
@@ -243,14 +218,10 @@ namespace MyApi.Services.Loans
 
             if (loan.Status != LoanStatus.Pending.ToString())
                 throw new Exception("Only pending loans can be approved.");
-
-            // Cập nhật trạng thái
             loan.Status = LoanStatus.Approved.ToString();
             loan.UpdatedAt = DateTime.UtcNow;
 
             await _db.SaveChangesAsync();
-
-            // ✅ Tạo notification cho user
             var notification = new Notification
             {
                 UserId = loan.UserId,
@@ -279,12 +250,8 @@ namespace MyApi.Services.Loans
 
             if (loan.Status != LoanStatus.Pending.ToString())
                 throw new Exception("Only pending loans can be cancelled.");
-
-            // Cập nhật trạng thái
             loan.Status = LoanStatus.Cancelled.ToString();
             loan.UpdatedAt = DateTime.UtcNow;
-            
-            // Hoàn lại số lượng sách
             loan.Book.StockQuantity += 1;
 
             await _db.SaveChangesAsync();
@@ -302,10 +269,7 @@ namespace MyApi.Services.Loans
                     loan.DueDate.HasValue &&
                     DateTime.UtcNow > loan.DueDate.Value)
                 {
-                    // ✅ Khi chuyển sang Overdue, tính tiền phạt
                     loan.Status = LoanStatus.Overdue.ToString();
-                    
-                    // Tính tiền phạt: số ngày trễ × 20000đ
                     int overdueDays = (int)(DateTime.UtcNow - loan.DueDate.Value).TotalDays;
                     int fineAmount = overdueDays * 20000;
                     
@@ -313,11 +277,9 @@ namespace MyApi.Services.Loans
                     loan.UpdatedAt = DateTime.UtcNow;
                     updated = true;
                 }
-                // ✅ Nếu đã là Overdue, cập nhật tiền phạt mỗi lần query
                 else if (loan.Status == LoanStatus.Overdue.ToString() && 
                          loan.DueDate.HasValue)
                 {
-                    // Cập nhật tiền phạt theo số ngày trễ hiện tại
                     int overdueDays = (int)(DateTime.UtcNow - loan.DueDate.Value).TotalDays;
                     int fineAmount = overdueDays * 20000;
                     
@@ -349,27 +311,20 @@ namespace MyApi.Services.Loans
             if (!loan.DueDate.HasValue)
                 throw new Exception("Loan does not have a due date.");
 
-            // ✅ Nếu đã thanh toán (Paid), trả về thông tin
             if (loan.Status == LoanStatus.Paid.ToString())
             {
                 return new LoanResponse().ToResponse(loan);
             }
 
-            // ✅ Chỉ cho phép thanh toán khi status là Overdue hoặc Returned
+            //Chỉ cho phép thanh toán khi status là Overdue hoặc Returned
             if (loan.Status != LoanStatus.Overdue.ToString() && loan.Status != LoanStatus.Returned.ToString())
                 throw new Exception($"Cannot pay fine. Loan status is {loan.Status}. Only Overdue or Returned loans can pay fine.");
-
-            // ✅ Kiểm tra có tiền phạt không
             if (loan.FineAmount <= 0)
                 throw new Exception("No fine to pay for this loan.");
-
-            // ✅ Lưu thời gian trả sách thực tế khi user ấn thanh toán
             if (loan.ReturnDate == null)
             {
                 loan.ReturnDate = DateTime.UtcNow;
             }
-
-            // ✅ Cập nhật trạng thái thành Paid - chờ admin duyệt
             loan.Status = LoanStatus.Paid.ToString();
             loan.UpdatedAt = DateTime.UtcNow;
             
@@ -390,13 +345,9 @@ namespace MyApi.Services.Loans
 
             if (loan.Status != LoanStatus.Paid.ToString())
                 throw new Exception("Only paid loans can be approved for return. Loan status must be 'Paid'.");
-
-            // ✅ Admin duyệt trả sách → chuyển về Returned
             loan.Status = LoanStatus.Returned.ToString();
-            loan.ReturnDate = DateTime.UtcNow; // Set ngày trả sách chính thức
+            loan.ReturnDate = DateTime.UtcNow; 
             loan.UpdatedAt = DateTime.UtcNow;
-
-            // ✅ Hoàn lại số lượng sách vào kho
             if (loan.Book != null)
             {
                 loan.Book.StockQuantity += 1;
@@ -404,7 +355,6 @@ namespace MyApi.Services.Loans
 
             await _db.SaveChangesAsync();
 
-            // ✅ Tạo notification cho user
             var notification = new Notification
             {
                 UserId = loan.UserId,
@@ -436,19 +386,13 @@ namespace MyApi.Services.Loans
                 startDate = new DateTime(year, 1, 1);
                 endDate = new DateTime(year, 12, 31);
             }
-
-            // ✅ Load tất cả loans vào memory
             var loans = await _db.Loans
                 .Where(x => x.LoanDate.HasValue)
                 .ToListAsync();
-
-            // ✅ Filter theo period
             var filteredLoans = loans
                 .Where(x => x.LoanDate.Value.ToUniversalTime().Date >= startDate.Date &&
                            x.LoanDate.Value.ToUniversalTime().Date <= endDate.Date)
                 .ToList();
-
-            // ✅ Tính các stats
             var totalLoans = filteredLoans.Count;
             var approvingLoans = filteredLoans
                 .Count(x => x.Status == LoanStatus.Approved.ToString() ||

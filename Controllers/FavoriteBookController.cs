@@ -19,8 +19,6 @@ namespace MyApi.Controllers
         {
             _favoriteBookService = favoriteBookService;
         }
-
-        // ➕ ADD FAVORITE (route: POST /api/favorite/{id})
         [HttpPost("{id:int}")]
         public async Task<IActionResult> Add(int id)
         {
@@ -32,8 +30,6 @@ namespace MyApi.Controllers
 
             return Ok();
         }
-
-        // ❌ REMOVE FAVORITE
         [HttpDelete("{bookId}")]
         public async Task<IActionResult> Remove(int bookId)
         {
@@ -45,8 +41,6 @@ namespace MyApi.Controllers
 
             return Ok();
         }
-
-        // ✅ CHECK IF A BOOK IS FAVORITED (GET /api/favorite/{bookId}/is-favorited)
         [HttpGet("{bookId:int}/is-favorited")]
         public async Task<IActionResult> IsFavorited(int bookId)
         {
@@ -54,8 +48,6 @@ namespace MyApi.Controllers
             var isFavorited = await _favoriteBookService.IsFavoritedAsync(userId, bookId);
             return Ok(isFavorited);
         }
-
-        // ⭐ GET MY FAVORITES (PAGINATION OBJECT)
         [HttpGet("me")]
         public async Task<IActionResult> GetMyFavorites(int page = 1, int pageSize = 10)
         {

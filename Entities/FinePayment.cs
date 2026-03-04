@@ -8,8 +8,6 @@ namespace MyApi.Entities
         public DateTime PaymentDate { get; set; }
         public string? PaymentMethod { get; set; } // Cash, Card, Online, etc.
         public string? Description { get; set; }
-
-        // Navigation
         public User User { get; set; } = null!;
         public Loan Loan { get; set; } = null!;
     }
